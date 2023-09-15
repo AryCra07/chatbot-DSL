@@ -1,7 +1,5 @@
 import axios from 'axios'
 import {ElMessage, ElMessageBox} from 'element-plus';
-import {store} from '@/store';
-
 
 const service = axios.create({
     baseURL: process.env.VUE_APP_API,
@@ -43,7 +41,7 @@ service.interceptors.response.use(
                 type: 'warning',
                 closeOnClickModal: false
             }).then(() => {
-
+                console.log(1);
             })
         }
     }
