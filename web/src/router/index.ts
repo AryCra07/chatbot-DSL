@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router'
-import ChatBox from "@/components/ChatBox.vue";
+import ChatBox from '@/components/ChatRoom.vue';
 
 const routes: Array<RouteRecordRaw> = [
     {
