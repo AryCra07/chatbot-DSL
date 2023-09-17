@@ -1,6 +1,6 @@
 export interface MessagePacket {
-    isBot: boolean,
-    messageID: number,
-    time: number,
-    messageContent: string,
+  isBot: boolean;
+  id: number;
+  time: number;
+  content: string;
 }
