@@ -4,16 +4,12 @@ import { ChatResponseData } from '@/types/APITypes';
 export async function getStart(data: {
   mode: string;
 }): Promise<ChatResponseData> {
-  try {
-    const response = (await request({
-      url: '/api/bot/chat/init',
-      method: 'get',
-      data,
-    })) as never;
-    return response;
-  } catch (e) {
-    console.error(e);
-  }
+  const response = (await request({
+    url: '/api/bot/chat/init',
+    method: 'get',
+    data,
+  })) as never;
+  return response;
 }
 
 export async function getMessage(data: {
