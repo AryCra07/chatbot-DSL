@@ -1,0 +1,14 @@
+Variable
+    $name Text <Ayu>
+
+State Welcome
+    Speak $name + <, nice to meet you!>
+    Speak <Type "ask" to exit.>
+    Case <ask>
+        Speak $name+ <, sorry I can't answer your question--QAQ>
+        Exit
+    Default
+    Timer 10
+        Speak <Still Here? I will sleep after 10 seconds.>
+    Timer 20
+        Exit

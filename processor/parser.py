@@ -1,14 +1,6 @@
 import pyparsing as pp
 
 
-def test():
-    test_var = ChatDSL._variable_declaration.parse_string('Variable $a Int 1 $b Float 3e-4 $c <love you>').as_list()
-    test_listen = ChatDSL._listen_action.parse_string('Listen 10 100').as_list()
-    print(test_var)
-    print(test_listen)
-    return
-
-
 class ChatDSL(object):
     """Chat DSL parser
     """
@@ -30,14 +22,19 @@ class ChatDSL(object):
     # Parse conditional statement
     _length_condition = pp.Keyword('Length') + pp.oneOf('== < > <= >=') + _integer_type
     _contains_condition = pp.Keyword('Contains') + _string_type
-    _type_condition = pp.Keyword('Type') + _variable_type
-    _conditions = _length_condition ^ _contains_condition ^ _type_condition ^
+    _type_condition = pp.Keyword('Type') + (pp.Keyword('Int') ^ pp.Keyword('Float'))
+    _string_condition = _string_type
+    _conditions = _length_condition ^ _contains_condition ^ _type_condition ^ _string_condition
 
     # Parse Actions
-    _goto_action = pp.Group(pp.Keyword('Goto'))
-    _listen_action = pp.Group(pp.Keyword('Listen') + pp.Group(_integer_type + _integer_type))
-    _exit_action = pp.Keyword('Exit')
-    _speak_content = _variable_name + _string_type
+    _goto_action = pp.Group(pp.Keyword('Goto') + pp.Word(pp.alphas))
+    _update_action = pp.Group(pp.Keyword('Update') + _variable_name +
+                              (((pp.Keyword('Add') ^ pp.Keyword('Sub') ^ pp.Keyword('Set'))
+                                + (_float_type ^ pp.Keyword('Input')))
+                               ^ (pp.Keyword('Set') + (_string_type ^ pp.Keyword('Input'))))
+                              )
+    _exit_action = pp.Group(pp.Keyword('Exit'))
+    _speak_content = _variable_name ^ _string_type
     _speak_action = pp.Group(pp.Keyword('Speak')) + pp.Group(
         (_speak_content + pp.ZeroOrMore('+' + _speak_content)).setParseAction(lambda tokens: tokens[0::2])
     )
@@ -46,13 +43,39 @@ class ChatDSL(object):
             lambda tokens: tokens[0::2])
     )
 
-    _case = pp.Group(
-        pp.Keyword('Case') +
+    _case_clause = pp.Group(
+        pp.Keyword('Case') + _conditions + pp.Group(pp.ZeroOrMore(_update_action ^ _speak_action_input) + pp.Opt(
+            _exit_action ^ _goto_action))
     )
+    _default_clause = pp.Group(
+        pp.Keyword('Default') + pp.Group(pp.ZeroOrMore(_update_action ^ _speak_action_input)
+                                         + pp.Opt(_exit_action ^ _goto_action))
+    )
+    _timer_clause = pp.Group(
+        pp.Keyword('Timer') + _integer_type + pp.Group(pp.ZeroOrMore(_update_action ^ _speak_action)
+                                                       + pp.Opt(_exit_action ^ _goto_action))
+    )
+
+    _state_definition = pp.Group(
+        pp.Keyword('State') + pp.Word(pp.alphas) + pp.Group(pp.Opt(pp.Keyword('Verified'))) + pp.Group(
+            pp.ZeroOrMore(_speak_action)) + pp.Group(pp.ZeroOrMore(_case_clause)) + _default_clause + pp.Group(
+            pp.ZeroOrMore(_timer_clause))
+    )
+
+    _language = pp.ZeroOrMore(_state_definition ^ _variable_declaration)
+
+    @staticmethod
+    def parse_files(files: list[str]) -> list[pp.ParseResults]:
+        result = []
+        for file in files:
+            if len(file) == 0:
+                continue
+            result += ChatDSL._language.parse_file(file, parse_all=True).as_list()
+        return result
 
 
 if __name__ == '__main__':
     try:
-        test()
+        print(ChatDSL.parse_files(['./test/parser/case1.txt']))
     except pp.ParseException as err:
         print(err.explain())
