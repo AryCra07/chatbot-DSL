@@ -33,7 +33,6 @@ class ChatDSL(object):
                                 + (_float_type ^ pp.Keyword('Input')))
                                ^ (pp.Keyword('Set') + (_string_type ^ pp.Keyword('Input'))))
                               )
-    _exit_action = pp.Group(pp.Keyword('Exit'))
     _speak_content = _variable_name ^ _string_type
     _speak_action = pp.Group(pp.Keyword('Speak')) + pp.Group(
         (_speak_content + pp.ZeroOrMore('+' + _speak_content)).setParseAction(lambda tokens: tokens[0::2])
@@ -42,7 +41,9 @@ class ChatDSL(object):
         (_speak_content + pp.ZeroOrMore('+' + (_speak_content ^ pp.Keyword('Input')))).setParseAction(
             lambda tokens: tokens[0::2])
     )
+    _exit_action = pp.Group(pp.Keyword('Exit'))
 
+    # Parse Clauses
     _case_clause = pp.Group(
         pp.Keyword('Case') + _conditions + pp.Group(pp.ZeroOrMore(_update_action ^ _speak_action_input) + pp.Opt(
             _exit_action ^ _goto_action))
@@ -56,12 +57,12 @@ class ChatDSL(object):
                                                        + pp.Opt(_exit_action ^ _goto_action))
     )
 
+    # Parse state and Group all
     _state_definition = pp.Group(
         pp.Keyword('State') + pp.Word(pp.alphas) + pp.Group(pp.Opt(pp.Keyword('Verified'))) + pp.Group(
             pp.ZeroOrMore(_speak_action)) + pp.Group(pp.ZeroOrMore(_case_clause)) + _default_clause + pp.Group(
             pp.ZeroOrMore(_timer_clause))
     )
-
     _language = pp.ZeroOrMore(_state_definition ^ _variable_declaration)
 
     @staticmethod

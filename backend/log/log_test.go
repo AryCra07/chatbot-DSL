@@ -1,24 +1,18 @@
 package log
 
 import (
-	"backend/consts"
-	"os"
 	"testing"
 )
 
-func TestLogInModeTest(t *testing.T) {
-	os.Args = []string{"", consts.ModeTest}
-
-	Info("Model", "In test I Love")
-
-	Info("Dao", "In test I Love")
+func TestInfo(t *testing.T) {
+	Info("Controller", "This is an information")
 
 }
 
-func TestLogInModeRelease(t *testing.T) {
-	os.Args = []string{"", consts.ModeRelease}
+func TestWarning(t *testing.T) {
+	Warning("Service", "This is a warning")
+}
 
-	Info("Service", "In release can be seen")
-
-	Info("Dao", "can't be seen")
+func TestError(t *testing.T) {
+	Error("Dao", "This is an error")
 }

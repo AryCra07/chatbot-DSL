@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	JwtKeyString    string = "AryCra07"
-	TokenValidHours        = 12
+	JwtKeyString    string        = "AryCra07-IfWinterComesCanSpringBeFarBehind?"
+	TokenValidHours time.Duration = 12
 )
 
 var JwtKey = []byte(JwtKeyString)
@@ -19,14 +19,14 @@ type Claims struct {
 }
 
 func ReleaseToken(userId int, auth int) (string, error) {
-	// token expire
+	// token expire time
 	expirationTime := time.Now().Add(TokenValidHours * time.Hour)
 
 	claims := &Claims{
-		// self design
+		// self design options
 		UserId: userId,
 		Auth:   auth,
-		// basic
+		// basic options
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
