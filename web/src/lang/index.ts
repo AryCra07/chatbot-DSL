@@ -20,6 +20,7 @@ export function getUserLanguage(): string {
 }
 
 const i18n = createI18n({
+  allowComposition: true,
   locale: navigator.language,
   messages: jointMessages,
 });
