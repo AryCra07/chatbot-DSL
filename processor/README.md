@@ -39,3 +39,8 @@
 <language>            ::= {<state_definition> | <variable_definition>}
 ```
 
+## gRPC
+
+```bash
+python -m grpc_tools.protoc -I./pb --python_out=./pb --grpc_python_out=./pb ./pb/hello.proto
+```
