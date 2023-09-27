@@ -55,7 +55,9 @@ export default {
 
       let pwdhash = Md5.hashStr(pwd.value + 'salt-9aSO(UIf89!(*@&12');
       let resp = await Sign({ username: username.value, pwd: pwdhash });
-      // if (resp.code == 0) {
+      if (resp === null) {
+        console.log(1);
+      }
       if (pwdhash !== '1') {
         store.$state.name = username.value;
         router.push('/chat');

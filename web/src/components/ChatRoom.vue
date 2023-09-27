@@ -136,7 +136,7 @@ export default defineComponent({
   mounted() {
     let resp;
     try {
-      resp = 1;
+      console.log(resp);
     } catch (error) {
       console.error(error);
     }
@@ -160,6 +160,7 @@ export default defineComponent({
     // to do
     goBack(): void {
       const parent = this.$parent;
+      console.log(parent);
       // parent.stage = 0;
     },
     sendMessage() {
