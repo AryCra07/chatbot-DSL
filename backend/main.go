@@ -1,36 +1,35 @@
 package main
 
 import (
-	"backend/pb"
 	"context"
 	"fmt"
+	"log"
+
+	"backend/pb" // 替换为你的 Protobuf 包的实际导入路径
 	"google.golang.org/grpc"
-	"net"
 )
 
-// hello server
-
-type server struct {
-	pb.UnimplementedGreeterServer
-}
-
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
-}
-
 func main() {
-	// 监听本地的8972端口
-	lis, err := net.Listen("tcp", ":8972")
+	// 连接 gRPC 服务器
+	conn, err := grpc.Dial("127.0.0.1:8972", grpc.WithInsecure())
 	if err != nil {
-		fmt.Printf("failed to listen: %v", err)
-		return
+		log.Fatalf("连接失败: %v", err)
 	}
-	s := grpc.NewServer()                  // 创建gRPC服务器
-	pb.RegisterGreeterServer(s, &server{}) // 在gRPC服务端注册服务
-	// 启动服务
-	err = s.Serve(lis)
+	defer conn.Close()
+
+	// 创建 gRPC 客户端
+	client := pb.NewGreeterClient(conn)
+
+	// 创建上下文和请求
+	ctx := context.Background()
+	req := &pb.HelloRequest{Name: "AryCra07"}
+
+	// 调用 gRPC 服务
+	resp, err := client.SayHello(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to serve: %v", err)
-		return
+		log.Fatalf("调用服务失败: %v", err)
 	}
+
+	// 打印响应
+	fmt.Printf("服务响应: %s\n", resp.GetReply())
 }
