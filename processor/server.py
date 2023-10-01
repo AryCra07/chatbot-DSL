@@ -2,20 +2,18 @@
 
 import grpc
 from concurrent import futures
-import pb.hello_pb2 as hpb2
-import pb.hello_pb2_grpc as hpb2g
+from pb import chat_pb2, chat_pb2_grpc
 import logging
 
-class Greeter(hpb2g.GreeterServicer):
-    def SayHello(self, request, context):
-        logging.info("dqwdq")
+class AnswerGenerator(chat_pb2_grpc.AnswerGeneratorServicer):
+    def Answer(self, request, context):
         logging.info(request)
-        return hpb2.HelloResponse(reply="Hello " + request.name)
+        return chat_pb2.ChatResponse(answer="Hello " + request.userName + '!' + str(request.userState), state=-1)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     logging.info("Server Start")
-    hpb2g.add_GreeterServicer_to_server(Greeter(), server)
+    chat_pb2_grpc.add_AnswerGeneratorServicer_to_server(AnswerGenerator(), server)
     server.add_insecure_port('[::]:8972')
     server.start()
     server.wait_for_termination()

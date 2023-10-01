@@ -1,5 +1,6 @@
 Variable
     $name Text <Ayu>
+    $age  Int  20
 
 State Welcome
     Speak $name + <, nice to meet you!>

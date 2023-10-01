@@ -1,9 +1,11 @@
 package model
 
 type User struct {
-	ID       int    `db:"id"`
-	Name     string `db:"name"`
-	Password string `db:"password"`
-	Profile  string `db:"profile"`
-	Auth     int    `db:"auth"`
+	Id       string `gorm:"primary_key" json:"id"`
+	Name     string `gorm:"type:varchar(20);not null;unique" json:"user"`
+	Password string `gorm:"type:varchar(20);not null;" json:"password"`
+}
+
+func (User) TableName() string {
+	return "user"
 }

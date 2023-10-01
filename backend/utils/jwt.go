@@ -13,19 +13,19 @@ const (
 var JwtKey = []byte(JwtKeyString)
 
 type Claims struct {
-	UserId int
-	Auth   int
+	UserId   string `json:"userId"`
+	Password string `json:"password"`
 	jwt.StandardClaims
 }
 
-func ReleaseToken(userId int, auth int) (string, error) {
+func GenerateToken(userId string, password string) (string, error) {
 	// token expire time
 	expirationTime := time.Now().Add(TokenValidHours * time.Hour)
 
 	claims := &Claims{
 		// self design options
-		UserId: userId,
-		Auth:   auth,
+		UserId:   userId,
+		Password: password,
 		// basic options
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -36,13 +36,10 @@ func ReleaseToken(userId int, auth int) (string, error) {
 	}
 
 	// jwt generate token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(JwtKey)
-	if err != nil {
-		return "", err
-	}
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenClaims.SignedString(JwtKey)
 
-	return tokenString, nil
+	return token, err
 }
 
 func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {

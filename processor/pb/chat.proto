@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "backend/pb";
+
+package pb;
+
+service AnswerGenerator {
+  rpc Answer (ChatRequest) returns (ChatResponse) {}
+}
+
+message ChatRequest {
+  string userName = 1;
+  string userInput = 2;
+  int32 userState = 3;
+}
+
+message ChatResponse {
+  string answer = 1;
+  int32 state = 2;
+}
