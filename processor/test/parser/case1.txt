@@ -2,11 +2,30 @@ Variable
     $name Text <Ayu>
     $age  Int  20
 
-State Welcome
+State Welcome Verified
+    Speak <, nice to meet you!> + $name
+    Speak <Type "ask" to exit.>
+    Case <ask>
+    Case <query>
+    Case Length
+        Speak $name+ <, sorry I can't answer your question--QAQ>
+        Exit
+    Case Length < 10
+        Exit
+    Default
+        Goto hello
+    Timer 10
+        Speak <Still Here? I will sleep after 10 seconds.>
+    Timer 20
+        Exit
+
+State hello
     Speak $name + <, nice to meet you!>
     Speak <Type "ask" to exit.>
     Case <ask>
         Speak $name+ <, sorry I can't answer your question--QAQ>
+        Exit
+    Case Length < 10
         Exit
     Default
     Timer 10

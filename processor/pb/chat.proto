@@ -4,17 +4,27 @@ option go_package = "backend/pb";
 
 package pb;
 
+/**
+  * The gRPC service definition
+    Implement streaming RPCs between backend and processor
+    :param: a request message containing the user's input and basic info
+    :return: a response containing the answer and the latest user's info
+ */
 service AnswerGenerator {
-  rpc Answer (ChatRequest) returns (ChatResponse) {}
+  rpc Answer (stream ChatRequest) returns (stream ChatResponse) {}
 }
 
 message ChatRequest {
-  string userName = 1;
-  string userInput = 2;
-  int32 userState = 3;
+  int32 userState = 1;
+  string userName = 2;
+  string userInput = 3;
+  map<string, int32> userWallet = 4; // balance loan
 }
 
 message ChatResponse {
-  string answer = 1;
-  int32 state = 2;
+  int32 state = 1;
+  string answer = 2;
+  map<string, int32> userWallet = 3;
+  optional bool verification = 4;
+  optional int32 timer = 5;
 }

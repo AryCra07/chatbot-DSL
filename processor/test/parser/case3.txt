@@ -1,0 +1,42 @@
+Variable
+    $name Text <用户>
+    $billing Float 0.0
+
+State Welcome
+    Default
+        Goto Hello
+
+State Hello Verified
+    Speak <test1> + $name + $billing + $transactions
+    Case Length < 20
+    Case Length > 10
+    Case Length == 5
+    Case Length >= 0
+    Case Length <= 200
+        Goto Welcome
+    Default
+        Exit
+    Timer 0
+    Timer 500
+        Update $transactions Add 1
+
+Variable
+    $transactions Int 0
+
+State Goodbye Verified
+    Case Contains <goodbye>
+        Update $billing Set 0
+    Case <nooooo>
+        Speak $name + <timeout> + Input
+        Update $billing Sub -1
+        Update $name Set Input
+    Case Type Int
+        Update $transactions Add Input
+        Update $billing Add Input
+    Case Type Float
+        Update $billing Sub Input
+    Default
+    Timer 0
+        Goto Welcome
+    Timer 20
+        Goto Hello

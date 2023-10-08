@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nchat.proto\x12\x02pb\"E\n\x0b\x43hatRequest\x12\x10\n\x08userName\x18\x01 \x01(\t\x12\x11\n\tuserInput\x18\x02 \x01(\t\x12\x11\n\tuserState\x18\x03 \x01(\x05\"-\n\x0c\x43hatResponse\x12\x0e\n\x06\x61nswer\x18\x01 \x01(\t\x12\r\n\x05state\x18\x02 \x01(\x05\x32@\n\x0f\x41nswerGenerator\x12-\n\x06\x41nswer\x12\x0f.pb.ChatRequest\x1a\x10.pb.ChatResponse\"\x00\x42\x0cZ\nbackend/pbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nchat.proto\x12\x02pb\"\xad\x01\n\x0b\x43hatRequest\x12\x10\n\x08userName\x18\x01 \x01(\t\x12\x11\n\tuserInput\x18\x02 \x01(\t\x12\x11\n\tuserState\x18\x03 \x01(\x05\x12\x33\n\nuserWallet\x18\x04 \x03(\x0b\x32\x1f.pb.ChatRequest.UserWalletEntry\x1a\x31\n\x0fUserWalletEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"\xb4\x01\n\x0c\x43hatResponse\x12\x0e\n\x06\x61nswer\x18\x01 \x01(\t\x12\r\n\x05state\x18\x02 \x01(\x05\x12\x34\n\nuserWallet\x18\x03 \x03(\x0b\x32 .pb.ChatResponse.UserWalletEntry\x12\x12\n\x05timer\x18\x04 \x01(\x05H\x00\x88\x01\x01\x1a\x31\n\x0fUserWalletEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x42\x08\n\x06_timer2D\n\x0f\x41nswerGenerator\x12\x31\n\x06\x41nswer\x12\x0f.pb.ChatRequest\x1a\x10.pb.ChatResponse\"\x00(\x01\x30\x01\x42\x0cZ\nbackend/pbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,10 +22,18 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\nbackend/pb'
-  _globals['_CHATREQUEST']._serialized_start=18
-  _globals['_CHATREQUEST']._serialized_end=87
-  _globals['_CHATRESPONSE']._serialized_start=89
-  _globals['_CHATRESPONSE']._serialized_end=134
-  _globals['_ANSWERGENERATOR']._serialized_start=136
-  _globals['_ANSWERGENERATOR']._serialized_end=200
+  _CHATREQUEST_USERWALLETENTRY._options = None
+  _CHATREQUEST_USERWALLETENTRY._serialized_options = b'8\001'
+  _CHATRESPONSE_USERWALLETENTRY._options = None
+  _CHATRESPONSE_USERWALLETENTRY._serialized_options = b'8\001'
+  _globals['_CHATREQUEST']._serialized_start=19
+  _globals['_CHATREQUEST']._serialized_end=192
+  _globals['_CHATREQUEST_USERWALLETENTRY']._serialized_start=143
+  _globals['_CHATREQUEST_USERWALLETENTRY']._serialized_end=192
+  _globals['_CHATRESPONSE']._serialized_start=195
+  _globals['_CHATRESPONSE']._serialized_end=375
+  _globals['_CHATRESPONSE_USERWALLETENTRY']._serialized_start=143
+  _globals['_CHATRESPONSE_USERWALLETENTRY']._serialized_end=192
+  _globals['_ANSWERGENERATOR']._serialized_start=377
+  _globals['_ANSWERGENERATOR']._serialized_end=445
 # @@protoc_insertion_point(module_scope)

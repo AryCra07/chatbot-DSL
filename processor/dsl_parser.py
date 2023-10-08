@@ -3,6 +3,8 @@ import pyparsing as pp
 
 class ChatDSL(object):
     """Chat DSL parser
+
+    This class is used to parse the chat DSL script into a list of parse results.
     """
 
     # Parse primitive types
@@ -23,8 +25,8 @@ class ChatDSL(object):
     _length_condition = pp.Keyword('Length') + pp.oneOf('== < > <= >=') + _integer_type
     _contains_condition = pp.Keyword('Contains') + _string_type
     _type_condition = pp.Keyword('Type') + (pp.Keyword('Int') ^ pp.Keyword('Float'))
-    _string_condition = _string_type
-    _conditions = _length_condition ^ _contains_condition ^ _type_condition ^ _string_condition
+    _equal_condition = _string_type
+    _conditions = _length_condition ^ _contains_condition ^ _type_condition ^ _equal_condition
 
     # Parse Actions
     _goto_action = pp.Group(pp.Keyword('Goto') + pp.Word(pp.alphas))
@@ -34,13 +36,12 @@ class ChatDSL(object):
                                ^ (pp.Keyword('Set') + (_string_type ^ pp.Keyword('Input'))))
                               )
     _speak_content = _variable_name ^ _string_type
-    _speak_action = pp.Group(pp.Keyword('Speak')) + pp.Group(
-        (_speak_content + pp.ZeroOrMore('+' + _speak_content)).setParseAction(lambda tokens: tokens[0::2])
-    )
-    _speak_action_input = pp.Group(pp.Keyword('Speak')) + pp.Group(
-        (_speak_content + pp.ZeroOrMore('+' + (_speak_content ^ pp.Keyword('Input')))).setParseAction(
-            lambda tokens: tokens[0::2])
-    )
+    _speak_action = pp.Group(pp.Keyword('Speak') + pp.Group(
+        (_speak_content + pp.ZeroOrMore('+' + _speak_content)).setParseAction(lambda tokens: tokens[0::2])))
+
+    _speak_action_input = pp.Group(pp.Keyword('Speak') + pp.Group(((_speak_content ^ pp.Keyword(
+        'Input')) + pp.ZeroOrMore('+' + (_speak_content ^ pp.Keyword('Input')))).setParseAction(
+        lambda tokens: tokens[0::2])))
     _exit_action = pp.Group(pp.Keyword('Exit'))
 
     # Parse Clauses
@@ -66,17 +67,22 @@ class ChatDSL(object):
     _language = pp.ZeroOrMore(_state_definition ^ _variable_declaration)
 
     @staticmethod
-    def parse_files(files: list[str]) -> list[pp.ParseResults]:
+    def parse_scripts(scripts: list[str]) -> list[pp.ParseResults]:
+        """
+        Parse the scripts into a list of parse results
+        :param scripts a list of the scripts
+        :return: a list of the parsed grammar tree
+        """
         result = []
-        for file in files:
-            if len(file) == 0:
+        for script in scripts:
+            if len(script) == 0:
                 continue
-            result += ChatDSL._language.parse_file(file, parse_all=True).as_list()
+            result += ChatDSL._language.parse_file(script, parse_all=True).as_list()
         return result
 
 
 if __name__ == '__main__':
     try:
-        print(ChatDSL.parse_files(['./test/parser/case1.txt']))
+        print(ChatDSL.parse_scripts(['./test/parser/case3.txt']))
     except pp.ParseException as err:
         print(err.explain())
