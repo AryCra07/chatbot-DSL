@@ -17,14 +17,9 @@ const InvalidRequest = "Request is invalid"
 const SUCCESS = 0
 const FAIL = -1
 
-const NotExistId = -1
-const RepeatId = -2
+const NotExistId = "NotExistId"
+const RepeatId = "RepeatId"
 const InvalidAuth = -1
-
-// traffic
-const HighCongestion = 3
-const MiddleCongestion = 2
-const LowCongestion = 1
 
 // database
 const DefaultAuth = 0

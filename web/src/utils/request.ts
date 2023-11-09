@@ -1,9 +1,12 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
-const service = axios.create({
-  baseURL: process.env.VUE_APP_API,
+const service: AxiosInstance = axios.create({
+  baseURL: 'api/',
   timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json;charset=utf-8',
+  },
 });
 
 service.interceptors.request.use(

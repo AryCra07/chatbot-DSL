@@ -2,6 +2,7 @@ from threading import Lock
 from abc import ABCMeta, abstractmethod
 from typing import Any, Union, Optional
 from dsl_parser import ChatDSL
+import time
 
 
 class GrammarError(Exception):
@@ -18,16 +19,23 @@ class UserInfo(object):
         self.wallet = user_wallet
         self.last_time = 0
         self.lock = Lock()
+        self.verified = False
+        self.send_time = time.time()
+        self.answer = []
 
 
 class Response(object):
-    def __init__(self, state: int, answer: str, user_wallet: dict[str, Any], verified: Optional[bool],
-                 timer: Optional[int]):
+    def __init__(self, state: int = 0, answer: list[str] = None, user_wallet: dict[str, Any] = None,
+                 verified: Optional[bool] = False,
+                 timer: Optional[int] = 3600):
+        if answer is None:
+            answer = []
         self.state = state
         self.answer = answer
         self.wallet = user_wallet
         self.verified = verified
         self.timer = timer
+        self.lock = Lock()
 
 
 class Condition(metaclass=ABCMeta):
@@ -100,7 +108,7 @@ class EqualCondition(Condition):
 
 class Action(metaclass=ABCMeta):
     @abstractmethod
-    def exec(self, user_info: UserInfo, response: Response, variable_set: dict[str, Any]) -> None:
+    def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         pass
 
 
@@ -115,16 +123,16 @@ class SpeakAction(Action):
     def __repr__(self) -> str:
         return 'Speak ' + ' + '.join(self.contents)
 
-    def exec(self, user_info: UserInfo, response: Response, variable_set: dict[str, Any]) -> None:
+    def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         res = ''
         for content in self.contents:
             if content[0] == '$':
                 res += str(variable_set[content[1:]])
-            elif content[0] == '<' and content[-1] == '>':
-                res += content[1:-1]
             elif content == 'Input':
                 res += user_info.input
-        response.answer = res
+            else:
+                res += content
+        user_info.answer.append(res)
 
 
 class UpdateAction(Action):
@@ -133,26 +141,26 @@ class UpdateAction(Action):
         if variable not in variable_set:
             raise GrammarError(f"Variable {variable} does not exist", ["Update", variable, op, value])
         v_value = variable_set[variable]
-        if isinstance(v_value, int):  # 变量类型是整数
-            if value == "Input":
-                if value_check != "Int":  # 必须进行整数类型检查
-                    raise GrammarError("使用Update Copy时变量类型检查出错", ["Update", variable, op, value])
-            elif not (isinstance(value, float) or isinstance(value, int)) or int(value) != value:  # 字面值必须是整数
-                raise GrammarError("Update的值和变量类型不同", ["Update", variable, op, int(value)])
-        elif isinstance(v_value, float):  # 变量类型是实数
+        if isinstance(v_value, int):
             if value == 'Input':
-                if not (value_check == "Float" or value_check == "Int"):  # 必须进行整数或者浮点数类型检查
-                    raise GrammarError("使用Update Copy时变量类型检查出错", ["Update", variable, op, value])
-            elif not isinstance(value, float):  # 字面值必须是浮点数
-                raise GrammarError("Update的值和变量类型不同", ["Update", variable, op, value])
+                if value_check != 'Int':
+                    raise GrammarError('Type Error of Input in Update', ['Update', variable, op, value])
+            elif not (isinstance(value, float) or isinstance(value, int)) or int(value) != value:  # 字面值必须是整数
+                raise GrammarError('Value-Type conflict in Update', ['Update', variable, op, int(value)])
+        elif isinstance(v_value, float):
+            if value == 'Input':
+                if not (value_check == 'Float' or value_check == 'Int'):  # 必须进行整数或者浮点数类型检查
+                    raise GrammarError('Type Error of Input in Update', ['Update', variable, op, value])
+            elif not isinstance(value, float):
+                raise GrammarError('Value-Type conflict in Update', ['Update', variable, op, value])
         elif isinstance(v_value, str):
             if value == 'Input':
-                if value_check is None:  # 必须进行类型检查
-                    raise GrammarError("使用Update Copy时变量类型检查出错", ["Update", variable, op, value])
-            if not isinstance(value, str):  # 字面值必须是字符串
-                raise GrammarError("Update的值和变量类型不同", ["Update", variable, op, value])
-            if op != "Set":  # 字符串只能进行Set操作
-                raise GrammarError("Update字符串变量只允许使用Set操作", ["Update", variable, op, value])
+                if value_check is None:
+                    raise GrammarError('Type Error of Input in Update', ['Update', variable, op, value])
+            if not isinstance(value, str):
+                raise GrammarError('Value-Type conflict in Update', ['Update', variable, op, value])
+            if op != 'Set':
+                raise GrammarError('Only allow "Set" in Update', ['Update', variable, op, value])
 
         self.variable = variable
         self.op = op
@@ -161,7 +169,7 @@ class UpdateAction(Action):
     def __repr__(self) -> str:
         return f'Update {self.variable} {self.op} {self.value}'
 
-    def exec(self, user_info: UserInfo, response: Response, variable_set: dict[str, Any]) -> None:
+    def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         request = user_info.input
         if self.op == 'Add':
             value = variable_set[self.variable]
@@ -174,7 +182,7 @@ class UpdateAction(Action):
                 variable_set[self.variable] = value + self.value
         elif self.op == "Sub":
             value = variable_set[self.variable]
-            if self.value == 'Input':  # 根据用户输入处理值
+            if self.value == 'Input':  # process based on Input
                 if isinstance(self.value, int):
                     variable_set[self.variable] = value - int(self.value)
                 elif isinstance(self.value, float):
@@ -182,7 +190,7 @@ class UpdateAction(Action):
             else:
                 variable_set[self.variable] = value - self.value
         elif self.op == "Set":
-            if self.value == 'Input':  # 根据用户输入处理值
+            if self.value == 'Input':  # process based on Input
                 if isinstance(self.value, int):
                     variable_set[self.variable] = int(request)
                 elif isinstance(self.value, float):
@@ -204,7 +212,7 @@ class GotoAction(Action):
     def __repr__(self):
         return f'Goto {self.next}'
 
-    def exec(self, user_info: UserInfo, response: Response, variable_set: dict[str, Any]) -> None:
+    def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         with user_info.lock:
             user_info.state = self.next
 
@@ -214,7 +222,7 @@ class ExitAction(Action):
     def __repr__(self):
         return 'Exit'
 
-    def exec(self, user_info: UserInfo, response: Response, variable_set: dict[str, Any]) -> None:
+    def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         with user_info.lock:
             user_info.state = -1
 
@@ -228,7 +236,7 @@ class CaseClause(object):
         return repr(self.condition) + ": " + "; ".join([repr(i) for i in self.actions])
 
 
-class SateMachine(object):
+class StateMachine(object):
 
     def _action_constructor(self, action_list: list, target_list: list[Action], index: int, verified: list[bool],
                             value_check: Optional[str]) -> None:
@@ -331,25 +339,33 @@ class SateMachine(object):
                                              state_index, verified, None)
 
     def hello(self, user_info: UserInfo) -> list[str]:
-        response: list[str] = []
+        self.synchronous1(user_info)
         for action in self.speak[user_info.state]:
-            action.exec(user_info, response, None)
-        return response
+            action.exec(user_info, self.variable_set)
+        return user_info.answer
 
-    def condition_transform(self, user_info: UserInfo) -> Response:
-        response: Response
+    def condition_transform(self, user_info: UserInfo) -> UserInfo:
+        self.synchronous1(user_info)
+        old_s = user_info.state
         for case in self.case[user_info.state]:
             if case.condition.check(user_info.input):
                 for action in case.actions:
-                    action.exec(user_info, response, self.variable_set)
-                if user_info.state != -1:  # 新状态的speak动作
-                    response += self.hello(user_info)
-                return response
-            for action in self.default[user_info.state]:
-                action.exec(user_info)
-            if user_info.state != -1:  # 新状态的speak动作
-                response += self.hello(user_info)
-            return response
+                    action.exec(user_info, self.variable_set)
+                if user_info.state != -1 and user_info.state != old_s:  # 新状态的speak动作
+                    user_info = self.hello(user_info)
+                return user_info
+        for action in self.default[user_info.state]:
+            action.exec(user_info, self.variable_set)
+        if user_info.state != -1 and user_info.state != old_s:  # 新状态的speak动作
+            user_info = self.hello(user_info)
+        # self.synchronous2(response)
+        return user_info
+
+    """
+    this function is used to transform the timeout action
+    :param user_info: the user_info to be transformed
+    :param now_seconds: the current time in seconds
+    """
 
     def timeout_transform(self, user_info: UserInfo, now_seconds: int) -> (list[str], bool, bool):
         response: list[str] = []
@@ -360,30 +376,54 @@ class SateMachine(object):
         for timeout_sec in self.timer[user_info.state].keys():
             if last_seconds < timeout_sec <= now_seconds:  # 检查字典的键是否在时间间隔内
                 for action in self.timer[user_info.state][timeout_sec]:
-                    action.exec(user_info, response, "")
+                    action.exec(user_info, self.variable_set)
                 if old_state != user_info.state:  # 如果旧状态和新状态不同，执行新状态的speak动作
                     if user_info.state != -1:
-                        response += self.hello(user_info)
+                        response = self.hello(user_info).answer
                     break
         return response, user_info.state == -1, old_state != user_info.state
 
-    def synchronous1(self, use_info: UserInfo, variable_set: dict[str, Any]):
-        for key in variable_set:
-            if key in use_info.wallet:
-                variable_set[key] = use_info.wallet[key]
+    """
+    this function is used to synchronize the variable_set with the user_info
+    :param use_info: the user_info to be synchronized
+    """
 
-    def synchronous2(self, response: Response, variable_set: dict[str, Any]):
-        pass
+    def synchronous1(self, user_info: UserInfo):
+        self.variable_set['name'] = user_info.name
+        for key in self.variable_set:
+            if key in user_info.wallet:
+                self.variable_set[key] = user_info.wallet[key]
+
+    def synchronous2(self, user_info: UserInfo):
+        for key in self.variable_set:
+            if key in user_info.wallet:
+                user_info.wallet[key] = self.variable_set[key]
 
 
 if __name__ == '__main__':
     try:
-        m = SateMachine(["./test/parser/case3.txt"])
+        m = StateMachine(["./test/parser/case3.txt"])
         print(m.states)
-        print(m.speak)
-        print(m.case)
-        print(m.default)
-        print(m.timer)
+        # print(m.speak)
+        # print(m.case)
+        # print(m.default)
+        # print(m.timer)
+
+        u1 = UserInfo(0, 'syh', '12', {'balance': 1000})
+        # m.hello(u, r)
+        # print(f'answer is {r.answer}')
+        m.hello(u1)
+        print(m.states[u1.state], u1.answer)
+        u2 = UserInfo(u1.state, 'syh', '12', {'balance': 1000})
+        m.condition_transform(u2)
+        print(m.states[u2.state], u2.answer)
+        u3 = UserInfo(u2.state, 'syh', 'ask hhhh', {'balance': 1000})
+        m.condition_transform(u3)
+        print(m.states[u3.state], u3.answer)
+        u4 = UserInfo(u3.state, 'syh', '优惠', {'balance': 1000})
+        m.condition_transform(u4)
+        print(m.states[u4.state], u4.answer)
+
     except GrammarError as err:
         print(" ".join([str(item) for item in err.context]))
         print("GrammarError: ", err.msg)

@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { Sign } from '@/api/login-register';
+import { Login } from '@/api/login-register';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { openToast } from 'toast-ts';
@@ -54,7 +54,7 @@ export default {
       }
 
       let pwdhash = Md5.hashStr(pwd.value + 'salt-9aSO(UIf89!(*@&12');
-      let resp = await Sign({ username: username.value, pwd: pwdhash });
+      let resp = await Login({ username: username.value, pwd: pwdhash });
       if (resp === null) {
         console.log(1);
       }

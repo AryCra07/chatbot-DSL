@@ -1,24 +1,22 @@
 import request from '@/utils/request';
-import { ChatResponseData } from '@/types/APITypes';
+import {ChatResponseData} from '@/types/APITypes';
 
-export async function getStart(data: {
+export async function getHello(data: {
   mode: string;
 }): Promise<ChatResponseData> {
-  const response = (await request({
-    url: '/api/bot/chat/init',
+  return (await request({
+    url: '/api/hello',
     method: 'get',
     data,
   })) as never;
-  return response;
 }
 
 export async function getMessage(data: {
   mode: string;
 }): Promise<ChatResponseData> {
-  const response = (await request({
-    url: '/api/bot/chat/message',
+  return (await request({
+    url: '/api/message',
     method: 'get',
     data,
   })) as never;
-  return response;
 }

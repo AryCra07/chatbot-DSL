@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"gorm.io/driver/mysql"
@@ -23,5 +23,11 @@ func InitMySQL() (*gorm.DB, error) {
 }
 
 func CloseDB(db *gorm.DB, err error) {
-
+	sqlDB, _ := db.DB()
+	if err != nil {
+		err := sqlDB.Close()
+		if err != nil {
+			return
+		}
+	}
 }

@@ -32,9 +32,8 @@ func AUTHMiddleware() gin.HandlerFunc {
 			context.Abort()
 		} else {
 			userId := claims.UserId
-			auth := claims.Auth
 
-			if userId == consts.NotExistId && auth < 1 {
+			if userId == consts.NotExistId {
 				log.Error("Middleware", "Authentication fail with invalid uid")
 				context.JSON(http.StatusUnauthorized, gin.H{
 					"code": consts.SUCCESS,

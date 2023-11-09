@@ -1,19 +1,21 @@
 Variable
-    $name Text <用户>
-    $billing Float 0.0
+    $name Text <Ayu>
+    $billing Float 1.1
+    $balance Float 10.0
 
 State Welcome
+    Speak <Hello, ayu>
     Default
         Goto Hello
 
 State Hello Verified
-    Speak <test1> + $name + $billing + $transactions
-    Case Length < 20
-    Case Length > 10
-    Case Length == 5
-    Case Length >= 0
-    Case Length <= 200
-        Goto Welcome
+    Speak <test1: > + <Hello, > + $name + <! Your balance is > + $balance + <.>
+    Speak <Type 'ask' to ask me questions>
+    Case Contains <ask>
+        Goto Answer
+    Case Length >= 50
+        Speak <Your question is too long, ask again>
+        Goto Hello
     Default
         Exit
     Timer 0
@@ -24,13 +26,34 @@ Variable
     $transactions Int 0
 
 State Goodbye Verified
+    Speak <bye bye>
     Case Contains <goodbye>
         Update $billing Set 0
-    Case <nooooo>
+    Case <no>
         Speak $name + <timeout> + Input
         Update $billing Sub -1
         Update $name Set Input
     Case Type Int
+        Speak <hh>
+        Update $transactions Add Input
+        Update $billing Add Input
+    Case Type Float
+        Update $billing Sub Input
+    Default
+    Timer 0
+        Goto Welcome
+    Timer 20
+        Goto Hello
+
+State Answer Verified
+    Speak <Here's question>
+    Case Contains <退货>
+        Speak <不行捏>
+        Update $billing Set 0
+    Case <优惠>
+        Speak <购买满500打八折>
+    Case Type Int
+        Speak <hh>
         Update $transactions Add Input
         Update $billing Add Input
     Case Type Float
