@@ -1,5 +1,11 @@
 package global
 
-import "gorm.io/gorm"
+import (
+	"backend/config"
+	"gorm.io/gorm"
+)
 
-var DB *gorm.DB
+var (
+	DB     *gorm.DB
+	Config config.YamlConfig
+)

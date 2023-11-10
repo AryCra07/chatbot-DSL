@@ -44,7 +44,7 @@ func IsUsernameExist(name string) bool {
 	var user model.User
 	result := global.DB.Where("name = ?", name).First(&user)
 	if result.Error != nil {
-		log.Error(consts.Dao, "Query error when executing IsUsernameExist")
+		log.Warning(consts.Dao, "This user does not exist")
 		return false
 	}
 	return true

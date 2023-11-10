@@ -8,8 +8,8 @@ import (
 	"backend/utils"
 )
 
-func NewUser(username string, password string) (string, bool) {
-	user, flag, err := dao.Authentication(username, utils.GetMd5(password))
+func enterExistUser(username string, password string) (string, bool) {
+	user, flag, err := dao.Authentication(username, utils.GetSha256(password))
 	if err != nil {
 		log.Error(consts.Service, "Query error")
 		return consts.NotExistId, false
@@ -29,7 +29,7 @@ func Login(username string, password string) (string, bool) {
 	flag := dao.IsUsernameExist(username)
 	if flag {
 		log.Warning(consts.Service, "User has exist")
-		id, ok := NewUser(username, password)
+		id, ok := enterExistUser(username, password)
 		return id, ok
 	}
 
@@ -37,7 +37,7 @@ func Login(username string, password string) (string, bool) {
 	user := model.User{
 		Id:       utils.GetUUID(),
 		Name:     username,
-		Password: utils.GetMd5(password),
+		Password: utils.GetSha256(password),
 		State:    0,
 		Balance:  0,
 		Bill:     0,

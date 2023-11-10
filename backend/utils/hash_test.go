@@ -6,5 +6,5 @@ import (
 )
 
 func TestGetSha256(t *testing.T) {
-	fmt.Println(GetSha256("nihao"))
+	fmt.Println(GetSha256("hello"))
 }

@@ -1,25 +1,32 @@
 package dao
 
 import (
+	"backend/config"
+	"backend/consts"
+	"backend/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"time"
 )
 
-func InitMySQL() (*gorm.DB, error) {
-	dsn := "root:root@tcp(127.0.0.1:3306)/chat-dsl?charset=utf8mb4&parseTime=True"
+func InitGorm() (*gorm.DB, error) {
+	dsn := config.Dsn(config.GetYamlConfig())
+	var mysqlLogger logger.Interface
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: mysqlLogger,
 	})
 	if err != nil {
+		log.Error(consts.Dao, "DB Connect Error")
 		return nil, err
 	}
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour * 4)
-	return db, nil
+	log.Info(consts.Dao, "Connect DB successfully")
+	return db, err
 }
 
 func CloseDB(db *gorm.DB, err error) {

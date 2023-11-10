@@ -15,7 +15,7 @@ func CreateServer() {
 	// user
 	user := router.Group("/user")
 	// login page
-	user.POST("/sign", controller.UserLoginPost)
+	user.POST("/login", controller.UserLoginPost)
 
 	// index page
 	user.POST("/hello", controller.UserChatHello)
