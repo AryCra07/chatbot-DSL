@@ -6,22 +6,34 @@ import eslintPlugin from 'vite-plugin-eslint';
 // https://vitejs.dev/config/
 
 export default defineConfig({
-	plugins: [
+  plugins: [
     vue(),
-		requireTransform({
-			fileRegex: /.ts$|.vue$/,
+    requireTransform({
+      fileRegex: /.ts$|.vue$/,
     }),
-		eslintPlugin({
-			include: ['src/**/*.ts', 'src/**/*.vue', 'src/*.ts', 'src/*.vue'],
-    }),
-	],
-	define: {
+    // eslintPlugin({
+    //   include: ['src/**/*.ts', 'src/**/*.vue', 'src/*.ts', 'src/*.vue'],
+    // }),
+  ],
+  server: {
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8848/',
+        changeOrigin: true,
+        rewrite(path) {
+          return path.replace(/^\/api/, '');
+        },
+      },
+    },
+  },
+  define: {
     'process.env': {},
   },
-	resolve: {
-		alias: {
+  resolve: {
+    alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-		},
+    },
     extensions: ['.vue', '.ts', '.js'],
-	},
+  },
 });

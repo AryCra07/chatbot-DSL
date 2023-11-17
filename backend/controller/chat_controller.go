@@ -2,7 +2,6 @@ package controller
 
 import (
 	"backend/consts"
-	"backend/dao"
 	"backend/log"
 	"backend/model"
 	"backend/service"
@@ -23,24 +22,15 @@ func UserChatMessage(c *gin.Context) {
 	}
 
 	// get parameters
-	name := request.Name
-	input := request.Input
-	user, flag := dao.GetUserInfo(name)
-	if !flag {
+	name := request.Data.Name
+	input := request.Data.Input
+
+	// get response
+	response, ok := service.GetMessage(name, input)
+	if response == nil || ok == false {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "Get message fail -- user not exist",
-			"data": gin.H{
-				"content": nil,
-			},
-		})
-		return
-	}
-	answer := service.GetMessage(name, user.State, input)
-	if answer == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": consts.FAIL,
-			"msg":  "Login fail",
+			"msg":  "Get Answer fail",
 			"data": gin.H{
 				"content": nil,
 			},
@@ -50,7 +40,8 @@ func UserChatMessage(c *gin.Context) {
 			"code": consts.SUCCESS,
 			"msg":  "Login success",
 			"data": gin.H{
-				"content": answer,
+				"content": response.Answer,
+				"timer":   response.Timer,
 			},
 		})
 	}

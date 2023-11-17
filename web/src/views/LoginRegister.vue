@@ -5,13 +5,13 @@
         class="username"
         type="text"
         v-model="username"
-        :placeholder="$t('message.username')"
+        :placeholder="this.$t('user_name')"
       />
       <el-input
         class="password"
         type="password"
         v-model="pwd"
-        :placeholder="$t('message.pwd')"
+        :placeholder="this.$t('pass_word')"
         @keyup.enter="submit"
         show-password
       />
@@ -19,8 +19,8 @@
         class="submit-btn"
         style="width: 300px"
         @click="submit"
-        >{{ $t('message.sign') }}</el-button
-      >
+        >{{ this.$t('login') }}
+      </el-button>
     </div>
   </div>
 </template>
@@ -29,10 +29,10 @@
 import { Login } from '@/api/login-register';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { openToast } from 'toast-ts';
 import { settingStore } from '@/store';
 import { Md5 } from 'ts-md5';
 import router from '@/router';
+import { ElMessageBox } from 'element-plus';
 
 export default {
   setup() {
@@ -42,27 +42,28 @@ export default {
     const store = settingStore();
 
     async function submit() {
-      if (username.value.length < 4 || username.value.length > 32) {
-        openToast(t('message.usrtext'));
+      if (username.value.length < 2 || username.value.length > 20) {
+        await ElMessageBox.alert(t('username_text'));
         return;
-      } else if (/^[a-z0-9A-Z_]+$/.test(username.value) === false) {
-        openToast(t('message.illegal_username'));
-        return;
-      } else if (pwd.value.length < 8) {
-        openToast(t('message.pwdtext'));
+      } else if (pwd.value.length < 6) {
+        await ElMessageBox.alert(t('password_text'));
         return;
       }
 
-      let pwdhash = Md5.hashStr(pwd.value + 'salt-9aSO(UIf89!(*@&12');
-      let resp = await Login({ username: username.value, pwd: pwdhash });
-      if (resp === null) {
-        console.log(1);
-      }
-      if (pwdhash !== '1') {
+      let password_hash = Md5.hashStr(pwd.value + 'salt-ji8*y89dQuiGYG');
+
+      let resp = await Login({
+        data: { name: username.value, password: password_hash },
+      });
+      if (resp.code === 0) {
         store.$state.name = username.value;
-        router.push('/chat');
+        store.$state.token = resp.data.token;
+        console.log(store);
+        console.log('LR:' + store.$state.token);
+        await router.push({ path: '/chat' });
       } else {
-        openToast(t('message.wrongpwd'));
+        console.log(resp);
+        await ElMessageBox.alert(t('login_fail'));
       }
     }
 
@@ -80,19 +81,21 @@ export default {
   display: flex;
   justify-content: center; /* 水平居中 */
   align-items: center; /* 垂直居中 */
-  min-height: 100vh; /* 保持内容垂直居中 */
+  height: 100vh;
+  overflow: hidden;
+  background-color: white;
 }
 
 @media screen and (min-width: 961px) {
   .box {
-    background: ivory;
+    //background: linear-gradient(to bottom left, #baccd9, #11659a);
+    background-color: #c7d2d4;
     position: relative;
     display: flex;
     flex-flow: column;
     width: 500px;
     height: 800px;
     border-radius: 5px;
-    //background-color: white;
     overflow: hidden;
     box-shadow:
       0 2px 4px rgba(0, 0, 0, 0.12),
@@ -105,7 +108,7 @@ export default {
 
 @media (max-width: 960px) {
   .box {
-    background: #2c3e50;
+    background: linear-gradient(#1781b5, #cdd1d3);
     position: relative;
     display: flex;
     flex-flow: column;

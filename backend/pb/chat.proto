@@ -20,15 +20,17 @@ message UserRequest {
   int32 state = 1;
   string name = 2;
   string input = 3;
-  map<string, int32> wallet = 4;
+  float balance = 4;
+  float bill = 5;
 }
 
 message ChatResponse {
   int32 state = 1;
   repeated string answer = 2;
-  map<string, int32> wallet = 3;
-  optional bool verification = 4;
-  optional int32 timer = 5;
+  float balance = 3;
+  float bill = 4;
+  optional bool verification = 5;
+  optional int32 timer = 6;
 }
 
 message HelloResponse {
@@ -40,5 +42,6 @@ message TimeoutResponse {
   bool reset = 2;
   int32 state = 3;
   repeated string answer = 4;
-  map<string, int32> wallet = 5;
+  float balance = 5;
+  float bill = 6;
 }

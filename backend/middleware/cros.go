@@ -5,6 +5,14 @@ import (
 	"net/http"
 )
 
+// CROSMiddleware is a middleware for Cross-Origin Resource Sharing
+/*
+	1. Set Access-Control-Allow-Origin to *
+	2. Set Access-Control-Allow-Methods to OPTIONS, POST, GET, PUT, PATCH, DELETE
+	3. Set Access-Control-Allow-Headers to Content-Type, Authorization
+	4. If request method is OPTIONS, return status 204
+	5. If request method is not OPTIONS, next
+*/
 func CROSMiddleware() gin.HandlerFunc {
 	const (
 		methodList string = "OPTIONS, POST, GET, PUT, PATCH, DELETE"

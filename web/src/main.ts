@@ -9,4 +9,4 @@ import i18n from '@/lang';
 
 const pinia = createPinia();
 
-createApp(App).use(router).use(ElementPlus).use(pinia).use(i18n).mount('#app');
+createApp(App).use(router).use(ElementPlus).use(i18n).use(pinia).mount('#app');

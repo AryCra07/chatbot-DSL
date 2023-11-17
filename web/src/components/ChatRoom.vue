@@ -112,7 +112,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MessagePacket } from '@/types/ChatTypes';
+import { fetchHello, fetchMessage } from '@/api/chat';
+import { ElMessageBox } from 'element-plus';
+import { settingStore } from '@/store';
 
 export default defineComponent({
   name: 'ChatBox',
@@ -121,27 +123,60 @@ export default defineComponent({
       disabled: false,
       message: '',
       latestMessageID: 0,
-      messageHistory: [] as MessagePacket[],
+      messageHistory: [] as any,
+      store: settingStore(),
     };
   },
-  // setup() {
-  //
-  // },
   props: {
     botName: { type: String, default: '' },
     serviceMode: { type: String, default: '' },
     schema: { type: String, default: '' },
     error: { type: String, default: '' },
   },
-  mounted() {
+  async mounted() {
+    // console.log(store.name)
+    let fail = false;
     let resp;
     try {
-      console.log(resp);
+      resp = await fetchHello({ data: { name: this.store.name } });
+      if (resp.code != 0) {
+        fail = true;
+      }
     } catch (error) {
       console.error(error);
+      fail = true;
     }
+
+    if (resp === undefined) {
+      await ElMessageBox.alert(this.$t('error'));
+      return;
+    }
+
+    if (fail) {
+      this.disabled = true;
+      this.message = this.$t('service_error');
+      return;
+    }
+
+    let msgList = resp.data.content;
+
+    msgList.forEach((msg) => {
+      this.loadMessage(true, msg, Date.now());
+    });
   },
   methods: {
+    async loadMessage(bot: boolean, msg: string, time: number) {
+      this.messageHistory.push({
+        msg_id: this.latestMessageID++,
+        isBot: bot,
+        content: msg,
+        time: time,
+      });
+      await this.$nextTick();
+      let historyContent = this.$refs.historyContent as any;
+      let historyScrollbar = this.$refs.historyScrollbar as any;
+      historyScrollbar.setScrollTop(historyContent.clientHeight);
+    },
     fillZero(num: number): string | number {
       return (num < 10 ? '0' : '') + num;
     },
@@ -163,21 +198,40 @@ export default defineComponent({
       console.log(parent);
       // parent.stage = 0;
     },
-    sendMessage() {
-      if (this.message === '') {
+    async sendMessage() {
+      let msg: string = this.message;
+      if (msg.length == 0) {
         return;
       }
-      this.messageHistory.push({
-        id: this.latestMessageID++,
-        content: this.message,
-        time: Date.now(),
-        isBot: 1 === this.latestMessageID % 2,
-      });
+      let time: number = new Date().getTime();
       this.message = '';
-      this.$nextTick(() => {
-        const historyContent = this.$refs.historyContent as HTMLElement;
-        historyContent.scrollTop = historyContent.scrollHeight;
-      });
+      await this.loadMessage(false, msg, time);
+
+      try {
+        let resp = await fetchMessage({
+          data: { name: this.store.name, input: msg },
+        });
+
+        if (resp.code == 2) {
+          msg = this.$t('expire');
+          time = new Date().getTime();
+          await this.loadMessage(true, msg, time);
+        } else if (resp.code != 0) {
+          msg = this.error;
+          time = new Date().getTime();
+          await this.loadMessage(true, msg, time);
+        } else {
+          let data = resp.data.content;
+          data.forEach((elem) => {
+            this.loadMessage(true, elem, Date.now());
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        msg = this.error;
+        time = new Date().getTime();
+        await this.loadMessage(true, msg, time);
+      }
     },
   },
 });
@@ -260,6 +314,8 @@ export default defineComponent({
       -moz-border-radius: 10px;
       -webkit-border-radius: 10px;
       border-radius: 10px;
+      color: white;
+      font-family: 'JetBrains Mono', '黑体', 'sans-serif';
 
       span {
         white-space: pre-wrap;
@@ -290,14 +346,14 @@ export default defineComponent({
       width: 0;
       height: 0;
       border-top: 13px solid transparent;
-      border-left: 25px solid #ed5a65;
+      border-left: 25px solid #1491a8;
       border-bottom: 13px solid transparent;
       margin: 6px -15px 0 0;
     }
 
     .user-bubble {
       margin-right: 25px;
-      background-color: #ed5a65;
+      background-color: #1491a8;
     }
 
     .time {

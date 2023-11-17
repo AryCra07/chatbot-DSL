@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(64) NOT NULL,
     state INT NOT NULL,
-    balance INT NOT NULL,
-    bill INT NOT NULL
+    balance FLOAT NOT NULL,
+    bill FLOAT NOT NULL
     );

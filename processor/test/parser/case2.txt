@@ -1,0 +1,62 @@
+Variable
+    $name Text <客户朋友>
+    $balance Float 0.0
+    $bill Float 0.0
+
+State Welcome
+    Speak <你好，> + $name + <！我是101>
+    Speak <输入 “查询” 查询你的余额与账单；> + <输入 “存款” 进行存款操作；> + <输入”购买“购买咱家产品>
+    Case Contains <查询>
+        Goto Query
+    Case Contains <存款>
+        Goto Deposit
+    Case Contains <买>
+        Goto Buy
+    Default
+        Speak <不好意思没听清，可以再说一遍嘛？>
+        Goto Hello
+
+State Hello Verified
+    Speak <输入 “查询” 查询你的余额与账单；> + <输入 “存款” 进行存款操作；> + <输入”购买“购买咱家产品>
+    Case Contains <查询>
+        Goto Query
+    Case Contains <存款>
+        Goto Deposit
+    Case Contains <买>
+        Goto Buy
+    Default
+        Speak <不好意思，我没太听懂，可以再说一遍嘛？>
+        Goto Hello
+
+State Query Verified
+    Speak <你好，> + $name + <！你的余额是> + $balance + <，你的账单是> + $bill
+    Speak <查询结束，祝您生活愉快！>
+    Default
+        Goto Hello
+    Timer 5
+        Goto Hello
+
+State Deposit Verified
+    Speak <你好，> + $name + <！请问你想存多少钱？请告诉我一个数字>
+    Case Type Float
+        Update $balance Add 1000
+        Speak <好的，已经给您的卡中存入> + Input + <！您的卡里现在有> + $balance + <元。>
+    Default
+        Speak <不好意思，您说的不太清楚，我们再来一遍好吗？>
+        Goto Deposit
+    Timer 10
+        Speak <存款服务先给您结束了，祝您生活愉快！>
+        Goto Hello
+
+State Buy Verified
+    Speak <白菜>
+    Default
+        Goto Hello
+
+State Goodbye Verified
+    Speak <bye bye>
+    Default
+    Timer 0
+        Goto Welcome
+    Timer 20
+        Goto Hello

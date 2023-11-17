@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend/controller"
+	"backend/middleware"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -10,7 +11,7 @@ func CreateServer() {
 	// create router engine
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	//router.Use(middleware.CROSMiddleware(), middleware.AUTHMiddleware())
+	router.Use(middleware.CROSMiddleware(), middleware.AUTHMiddleware())
 
 	// user
 	user := router.Group("/user")

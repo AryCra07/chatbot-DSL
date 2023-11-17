@@ -1,11 +1,13 @@
 package log
 
 import (
+	"strings"
 	"testing"
 )
 
 func TestInfo(t *testing.T) {
-	Info("Controller", "This is an information")
+	str := strings.Join([]string{"This is an information", "This is an information"}, " <-| ")
+	Info("Controller", str)
 
 }
 

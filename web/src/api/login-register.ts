@@ -1,12 +1,5 @@
 import request from '@/utils/request';
 
-export async function Login(data: {
-  username: string;
-  pwd: string;
-}): Promise<{ code: number; msg: number; data: void }> {
-  return (await request({
-    url: '/api/login',
-    method: 'post',
-    data,
-  })) as never;
+export async function Login(data: { name: string; password: string }): any {
+  return await request.post('/api/user/login', data);
 }

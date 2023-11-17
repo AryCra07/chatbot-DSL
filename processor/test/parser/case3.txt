@@ -4,7 +4,11 @@ Variable
     $balance Float 10.0
 
 State Welcome
-    Speak <Hello, ayu>
+    Speak <你好，> + $name + <！这里是商城客服小A>
+    Speak <输入 “查询” 查询余额>
+    Speak <输入 “优惠” 获取最新优惠信息>
+    Case Contains <查询>
+        Goto Answer
     Default
         Goto Hello
 
@@ -46,20 +50,12 @@ State Goodbye Verified
         Goto Hello
 
 State Answer Verified
-    Speak <Here's question>
+    Speak <你在狗叫什么？？>
     Case Contains <退货>
-        Speak <不行捏>
+        Speak <cnm滚蛋>
         Update $billing Set 0
     Case <优惠>
-        Speak <购买满500打八折>
-    Case Type Int
-        Speak <hh>
-        Update $transactions Add Input
-        Update $billing Add Input
-    Case Type Float
-        Update $billing Sub Input
+        Speak <购买满500腿打折>
     Default
-    Timer 0
-        Goto Welcome
-    Timer 20
-        Goto Hello
+        Speak <sb>
+        Exit

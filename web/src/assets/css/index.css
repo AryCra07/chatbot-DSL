@@ -1,3 +1,9 @@
+html, body, #app {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 .el-button {
     --el-button-bg-color: #c04851;
     --el-button-active-bg-color: #ed5a65;
@@ -5,6 +11,18 @@
     --el-button-border-color: #c04851;
     --el-button-hover-border-color: #eea2a4;
     --el-button-active-border-color: #c04851;
+    --el-button-active-text-color: white;
+    --el-button-hover-text-color: white;
+    --el-button-text-color: white;
+}
+
+.el-button {
+    --el-button-bg-color: #3b818c;
+    --el-button-active-bg-color: #1491a8;
+    --el-button-hover-bg-color: #0eb0c9;
+    --el-button-border-color: #3b818c;
+    --el-button-hover-border-color: #51c4d3;
+    --el-button-active-border-color: #3b818c;
     --el-button-active-text-color: white;
     --el-button-hover-text-color: white;
     --el-button-text-color: white;
@@ -19,7 +37,7 @@
 }
 
 .el-input {
-    --el-input-border-color: #eea2a4;
-    --el-input-hover-border-color: #eea2a4;
-    --el-input-focus-border-color: #eea2a4;
+    --el-input-border-color: #8fb2c9;
+    --el-input-hover-border-color: #8fb2c9;
+    --el-input-focus-border-color: #8fb2c9;
 }

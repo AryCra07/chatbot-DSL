@@ -4,6 +4,7 @@ option go_package = "backend/pb";
 
 package pb;
 
+//
 service Chat {
   rpc AnswerService (UserRequest) returns (ChatResponse) {}
 }

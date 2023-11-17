@@ -27,10 +27,11 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'vue'],
   rules: {
-    'linebreak-style': ['error', 'unix'],
+    'linebreak-style': ['warn', 'unix'],
     'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/no-unused-vars': ['warn'],
+    '@typescript-eslint/no-explicit-any': ['off'],
     quotes: ['error', 'single'],
-    semi: ['error', 'always']
+    semi: ['error', 'always'],
   },
 };

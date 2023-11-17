@@ -1,57 +1,97 @@
 import axios, { AxiosInstance } from 'axios';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import i18n from '@/lang';
+import { settingStore } from '@/store';
 
-const service: AxiosInstance = axios.create({
-  baseURL: 'api/',
+const request: AxiosInstance = axios.create({
+  baseURL: process.env.VITE_APP_API,
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
   },
 });
 
-service.interceptors.request.use(
+request.interceptors.request.use(
   (config) => {
+    const store = settingStore();
+    // do something before request is sent
+    const token = store.getToken;
+    console.log('token: ' + token);
+
+    if (token.length > 0) {
+      // let each request carry token
+      // ['X-Token'] is a custom headers key
+      // please modify it according to the actual situation
+      // axios.defaults.headers.common['token'] = getToken()
+
+      // console.log(axios.defaults.headers.common['token'])
+      const header = config.headers as any;
+      header.Authorization = token;
+    }
     return config;
   },
   (error) => {
-    console.log(error);
+    // do something with request error
+    console.log(error); // for debug
     return Promise.reject(error);
   },
 );
 
-service.interceptors.response.use(
-  (response) => {
-    const code = response.data.code;
-    const message = response.data.message;
+// response interceptor
+request.interceptors.response.use(
+  /**
+   * If you want to get http information such as headers or status
+   * Please return  response => response
+   */
 
-    if (code !== 0 && code !== 1) {
+  /**
+   * Determine the request status by custom code
+   * Here is just an example
+   * You can also judge the status by HTTP Status Code
+   */
+  (response) => {
+    const store = settingStore();
+    const res = response.data;
+    console.log(res);
+
+    // if the custom code is not 20000, it is judged as an error.
+    if (res.code !== 0) {
       ElMessage({
-        message: response.config.url + ': ' + message || 'Error',
+        message: res.msg || 'Error',
         type: 'error',
         duration: 5 * 1000,
       });
-      console.log(response);
-      return Promise.reject(new Error(message || 'Error'));
+
+      // -2: wrong token
+      if (res.code === -2) {
+        // to re-login
+        const t = i18n.global.t;
+        ElMessageBox.confirm(t('re_login_text'), t('logout'), {
+          confirmButtonText: t('re_login'),
+          cancelButtonText: t('cancel'),
+          type: 'warning',
+        }).then(() => {
+          store.setToken('');
+          location.reload();
+        });
+      }
+      return Promise.reject(new Error(res.msg || 'Error'));
+    } else if (res.code === 0) {
+      // store.setToken(res.data.token);
+      return res;
     } else {
-      return response.data;
+      return res;
     }
   },
   (error) => {
-    if (error.response.status === 401) {
-      ElMessageBox.confirm(
-        'You have been logged out, you can cancel to stay on this page, or log in again',
-        'Confirm Logout',
-        {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
-          type: 'warning',
-          closeOnClickModal: false,
-        },
-      ).then(() => {
-        console.log(1);
-      });
-    }
+    console.log('err' + error); // for debug
+    ElMessage({
+      message: error.message,
+      type: 'error',
+      duration: 5 * 1000,
+    });
+    return Promise.reject(error);
   },
 );
 
-export default service;
+export default request;

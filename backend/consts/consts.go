@@ -1,27 +1,34 @@
 package consts
 
 // information
-const EmptyStr = ""
-const ModeTest = "test"
-const ModeRelease = "release"
+const (
+	EmptyStr    = ""
+	ModeTest    = "test"
+	ModeRelease = "release"
+)
 
-const Main = "Main"
-const Config = "Config"
-const Controller = "Controller"
-const Service = "Service"
-const Dao = "Dao"
+// layer
+const (
+	Main       = "Main"
+	Config     = "Config"
+	Controller = "Controller"
+	Service    = "Service"
+	Dao        = "Dao"
+	Test       = "Test"
+)
 
-const InvalidRequest = "Request is invalid"
-
-// SUCCESS variable
-const SUCCESS = 0
-const FAIL = -1
-
-const NotExistId = "NotExistId"
-const RepeatId = "RepeatId"
-const InvalidAuth = -1
+// message and status
+const (
+	InvalidRequest = "Request is invalid"
+	NotExistId     = "NotExistId"
+	SUCCESS        = 0
+	FAIL           = -1
+	InvalidToken   = -2
+)
 
 // database
-const DefaultAuth = 0
-const AdminAuth = 1
-const DefaultName = "user"
+const (
+	DefaultAuth = 0
+	AdminAuth   = 1
+	DefaultName = "user"
+)

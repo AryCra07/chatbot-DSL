@@ -1,3 +1,9 @@
+"""生成器模块
+
+该模块读取脚本语言语法分析的结果，并构建出一个 Mealy 状态机。状态机的输入为用户消息类或者超时时长，输出为一个字符串序列。
+
+"""
+
 from threading import Lock
 from abc import ABCMeta, abstractmethod
 from typing import Any, Union, Optional
@@ -6,12 +12,29 @@ import time
 
 
 class GrammarError(Exception):
+    """语法错误异常类
+
+    :ivar msg: 错误信息
+    :ivar context: 错误上下文
+    """
     def __init__(self, msg: str, context: list[str]) -> None:
         self.msg = msg
         self.context = context
 
 
 class UserInfo(object):
+    """用户信息类
+
+    :ivar state: 用户状态
+    :ivar name: 用户名
+    :ivar input: 用户输入
+    :ivar wallet: 用户钱包
+    :ivar last_time: 上次发送消息的时间
+    :ivar lock: 互斥锁
+    :ivar verified: 是否已经通过验证
+    :ivar send_time: 发送消息的时间
+    :ivar answer: 机器人回复
+    """
     def __init__(self, user_state: int, user_name: str, user_input: str, user_wallet: dict[str, Any]) -> None:
         self.state = user_state
         self.name = user_name
@@ -22,20 +45,6 @@ class UserInfo(object):
         self.verified = False
         self.send_time = time.time()
         self.answer = []
-
-
-class Response(object):
-    def __init__(self, state: int = 0, answer: list[str] = None, user_wallet: dict[str, Any] = None,
-                 verified: Optional[bool] = False,
-                 timer: Optional[int] = 3600):
-        if answer is None:
-            answer = []
-        self.state = state
-        self.answer = answer
-        self.wallet = user_wallet
-        self.verified = verified
-        self.timer = timer
-        self.lock = Lock()
 
 
 class Condition(metaclass=ABCMeta):
@@ -86,7 +95,11 @@ class TypeCondition(Condition):
 
     def check(self, check_str: str) -> bool:
         if self.type == 'Int':
-            return check_str.isdigit()
+            try:
+                int(check_str)
+                return True
+            except ValueError:
+                return False
         elif self.type == 'Float':
             try:
                 float(check_str)
@@ -174,8 +187,10 @@ class UpdateAction(Action):
         if self.op == 'Add':
             value = variable_set[self.variable]
             if self.value == 'Input':  # 根据用户输入处理值
+                print('input' + request)
+                print(self.variable)
                 if isinstance(self.value, int):
-                    variable_set[self.variable] = value + int(self.value)
+                    variable_set[self.variable] = value + int(request)
                 elif isinstance(self.value, float):
                     variable_set[self.variable] = value + float(request)
             else:
@@ -338,12 +353,22 @@ class StateMachine(object):
                     self._action_constructor(timer_list[-1], self.timer[-1][timer_list[1]],
                                              state_index, verified, None)
 
+    """
+    this function is used to echo the hello words
+    :param user_info: the basic user_info
+    :return: a list of words for greeting
+    """
     def hello(self, user_info: UserInfo) -> list[str]:
         self.synchronous1(user_info)
         for action in self.speak[user_info.state]:
             action.exec(user_info, self.variable_set)
         return user_info.answer
 
+    """
+    this function is used to transform the condition action
+    :param user_info: the user_info before transform
+    :return: the user_info after transform
+    """
     def condition_transform(self, user_info: UserInfo) -> UserInfo:
         self.synchronous1(user_info)
         old_s = user_info.state
@@ -358,7 +383,7 @@ class StateMachine(object):
             action.exec(user_info, self.variable_set)
         if user_info.state != -1 and user_info.state != old_s:  # 新状态的speak动作
             user_info = self.hello(user_info)
-        # self.synchronous2(response)
+        self.synchronous2(user_info)
         return user_info
 
     """
@@ -366,7 +391,6 @@ class StateMachine(object):
     :param user_info: the user_info to be transformed
     :param now_seconds: the current time in seconds
     """
-
     def timeout_transform(self, user_info: UserInfo, now_seconds: int) -> (list[str], bool, bool):
         response: list[str] = []
         with user_info.lock:
@@ -394,6 +418,10 @@ class StateMachine(object):
             if key in user_info.wallet:
                 self.variable_set[key] = user_info.wallet[key]
 
+    """
+    this function is used to synchronize the user_info with the variable_set
+    :param use_info: the user_info to be synchronized
+    """
     def synchronous2(self, user_info: UserInfo):
         for key in self.variable_set:
             if key in user_info.wallet:
@@ -404,25 +432,26 @@ if __name__ == '__main__':
     try:
         m = StateMachine(["./test/parser/case3.txt"])
         print(m.states)
-        # print(m.speak)
-        # print(m.case)
-        # print(m.default)
-        # print(m.timer)
+        print(m.speak)
+        print(m.case)
+        print(m.default)
+        print(m.timer)
+        print(m.variable_set)
 
-        u1 = UserInfo(0, 'syh', '12', {'balance': 1000})
-        # m.hello(u, r)
-        # print(f'answer is {r.answer}')
-        m.hello(u1)
-        print(m.states[u1.state], u1.answer)
-        u2 = UserInfo(u1.state, 'syh', '12', {'balance': 1000})
-        m.condition_transform(u2)
-        print(m.states[u2.state], u2.answer)
-        u3 = UserInfo(u2.state, 'syh', 'ask hhhh', {'balance': 1000})
-        m.condition_transform(u3)
-        print(m.states[u3.state], u3.answer)
-        u4 = UserInfo(u3.state, 'syh', '优惠', {'balance': 1000})
-        m.condition_transform(u4)
-        print(m.states[u4.state], u4.answer)
+        # u1 = UserInfo(0, 'syh', '12', {'balance': 1000})
+        # # m.hello(u, r)
+        # # print(f'answer is {r.answer}')
+        # m.hello(u1)
+        # print(m.states[u1.state], u1.answer)
+        # u2 = UserInfo(u1.state, 'syh', '12', {'balance': 1000})
+        # m.condition_transform(u2)
+        # print(m.states[u2.state], u2.answer)
+        # u3 = UserInfo(u2.state, 'syh', 'ask hhhh', {'balance': 1000})
+        # m.condition_transform(u3)
+        # print(m.states[u3.state], u3.answer)
+        # u4 = UserInfo(u3.state, 'syh', '优惠', {'balance': 1000})
+        # m.condition_transform(u4)
+        # print(m.states[u4.state], u4.answer)
 
     except GrammarError as err:
         print(" ".join([str(item) for item in err.context]))

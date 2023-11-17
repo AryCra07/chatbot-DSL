@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 
-	global.DB, _ = dao.InitGorm()
 	global.Config = config.GetYamlConfig()
+	global.DB, _ = dao.InitGorm()
 	router.CreateServer()
 }

@@ -1,0 +1,20 @@
+Variable
+    $name Text <Ayu>
+    $balance Float 1000.0
+
+State Welcome
+    Speak <你好，> + $name + <！这里是商城客服小A>
+    Speak <您的余额是> + $balance + <元>
+    Case Contains <哈哈>
+        Goto Answer
+    Default
+        Goto Answer
+
+State Answer Verified
+    Speak <okk>
+    Case Type Float
+        Update $balance Add Input
+        Speak <您的余额是> + $balance + <元>
+    Default
+        Update $balance Add 100
+        Speak <您的余额是> + $balance + <元>

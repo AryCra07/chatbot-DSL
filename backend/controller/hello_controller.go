@@ -10,6 +10,10 @@ import (
 	"net/http"
 )
 
+// UserChatHello user register
+/*
+ * @param c: gin context
+ */
 func UserChatHello(c *gin.Context) {
 	var request model.HelloRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -23,7 +27,7 @@ func UserChatHello(c *gin.Context) {
 	}
 
 	// get parameters
-	name := request.Name
+	name := request.Data.Name
 	userInfo, flag := dao.GetUserInfo(name)
 	if !flag {
 		c.JSON(http.StatusOK, gin.H{

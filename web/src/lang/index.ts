@@ -1,16 +1,16 @@
 import { createI18n } from 'vue-i18n';
-import enCustomLocale from './en';
-import zhCustomLocale from './zh';
+import ehLocale from './en';
+import zhLocale from './zh';
 import elementEnLocale from 'element-plus/es/locale/lang/en';
 import elementZhLocale from 'element-plus/es/locale/lang/zh-cn';
 
 const jointMessages = {
   en: {
-    ...enCustomLocale,
+    ...ehLocale,
     ...elementEnLocale,
   },
-  zh: {
-    ...zhCustomLocale,
+  'zh-CN': {
+    ...zhLocale,
     ...elementZhLocale,
   },
 };
@@ -24,5 +24,13 @@ const i18n = createI18n({
   locale: navigator.language,
   messages: jointMessages,
 });
+
+// const i18n = new VueI18n({
+//   // set locale
+//   // options: en | zh | es
+//   locale: navigator.language,
+//   // set locale messages
+//   jointMessages,
+// });
 
 export default i18n;

@@ -4,6 +4,10 @@ import LoginRegister from '@/views/LoginRegister.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
+    path: '/',
+    redirect: '/login',
+  },
+  {
     path: '/chat',
     name: 'ChatBox',
     component: ChatBox,

@@ -3,6 +3,7 @@ package dao
 import (
 	"backend/config"
 	"backend/consts"
+	"backend/global"
 	"backend/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,8 +11,12 @@ import (
 	"time"
 )
 
+// InitGorm init gorm
+/*
+ * @return *gorm.DB: gorm db
+ */
 func InitGorm() (*gorm.DB, error) {
-	dsn := config.Dsn(config.GetYamlConfig())
+	dsn := config.Dsn(global.Config)
 	var mysqlLogger logger.Interface
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -29,6 +34,11 @@ func InitGorm() (*gorm.DB, error) {
 	return db, err
 }
 
+// CloseDB close db
+/*
+ * @param db: gorm db
+ * @param err: error
+ */
 func CloseDB(db *gorm.DB, err error) {
 	sqlDB, _ := db.DB()
 	if err != nil {

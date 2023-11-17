@@ -7,7 +7,7 @@ import (
 
 const (
 	JwtKeyString    string        = "AryCra07-IfWinterComesCanSpringBeFarBehind?"
-	TokenValidHours time.Duration = 12
+	TokenValidHours time.Duration = 4
 )
 
 var JwtKey = []byte(JwtKeyString)
@@ -18,6 +18,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+// GenerateToken generate jwt token, return token and error
 func GenerateToken(userId string, password string) (string, error) {
 	// token expire time
 	expirationTime := time.Now().Add(TokenValidHours * time.Hour)
@@ -42,6 +43,7 @@ func GenerateToken(userId string, password string) (string, error) {
 	return token, err
 }
 
+// ParseToken parse jwt token, return token and claims
 func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (i interface{}, err error) {
