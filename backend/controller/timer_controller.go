@@ -7,14 +7,11 @@ import (
 	"backend/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
-// UserChatMessage is a controller for user register
-/*
- * @param c: gin context
- */
-func UserChatMessage(c *gin.Context) {
-	var request model.MessageRequest
+func UserTimer(c *gin.Context) {
+	var request model.TimerRequest
 	if err := c.BindJSON(&request); err != nil {
 		log.Error(consts.Controller, "Message Body invalid")
 		c.JSON(http.StatusOK, gin.H{
@@ -26,7 +23,20 @@ func UserChatMessage(c *gin.Context) {
 	}
 
 	// get parameters
-	input := request.Data.Input
+	timeString := request.Data.NowTime
+	nowTime_, err := strconv.Atoi(timeString)
+	if err != nil {
+		log.Error(consts.Controller, "time parse fail when timer")
+		c.JSON(http.StatusOK, gin.H{
+			"code": consts.FAIL,
+			"msg":  "time parse fail when timer",
+			"data": nil,
+		})
+		return
+	}
+	nowTime := int32(nowTime_)
+
+	// get user id
 	userIdValue := c.Value("UserId")
 	if userIdValue == nil {
 		log.Error(consts.Controller, "user id does not exist when hello")
@@ -49,7 +59,7 @@ func UserChatMessage(c *gin.Context) {
 	}
 
 	// get response
-	response, ok := service.ChatResponse(userId, input)
+	response, ok := service.Timer(userId, nowTime)
 	if response == nil || ok == false {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
@@ -64,6 +74,8 @@ func UserChatMessage(c *gin.Context) {
 			"msg":  "Login success",
 			"data": gin.H{
 				"content": response.Answer,
+				"exit":    response.IsExit,
+				"reset":   response.Reset_,
 			},
 		})
 	}

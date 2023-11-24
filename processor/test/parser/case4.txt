@@ -7,8 +7,6 @@ State Welcome
     Speak <您的余额是> + $balance + <元>
     Case Contains <哈哈>
         Goto Answer
-    Default
-        Goto Answer
 
 State Answer Verified
     Speak <okk>

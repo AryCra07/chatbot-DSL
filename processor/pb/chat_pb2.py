@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nchat.proto\x12\x02pb\"\x95\x01\n\x0bUserRequest\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t\x12+\n\x06wallet\x18\x04 \x03(\x0b\x32\x1b.pb.UserRequest.WalletEntry\x1a-\n\x0bWalletEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"\xd4\x01\n\x0c\x43hatResponse\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0e\n\x06\x61nswer\x18\x02 \x03(\t\x12,\n\x06wallet\x18\x03 \x03(\x0b\x32\x1c.pb.ChatResponse.WalletEntry\x12\x19\n\x0cverification\x18\x04 \x01(\x08H\x00\x88\x01\x01\x12\x12\n\x05timer\x18\x05 \x01(\x05H\x01\x88\x01\x01\x1a-\n\x0bWalletEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x42\x0f\n\r_verificationB\x08\n\x06_timer\"\x1e\n\rHelloResponse\x12\r\n\x05words\x18\x01 \x03(\t\"\xb0\x01\n\x0fTimeoutResponse\x12\x0f\n\x07is_exit\x18\x01 \x01(\x08\x12\r\n\x05reset\x18\x02 \x01(\x08\x12\r\n\x05state\x18\x03 \x01(\x05\x12\x0e\n\x06\x61nswer\x18\x04 \x03(\t\x12/\n\x06wallet\x18\x05 \x03(\x0b\x32\x1f.pb.TimeoutResponse.WalletEntry\x1a-\n\x0bWalletEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x32<\n\x04\x43hat\x12\x34\n\rAnswerService\x12\x0f.pb.UserRequest\x1a\x10.pb.ChatResponse\"\x00\x32@\n\x05Greet\x12\x37\n\x0fSayHelloService\x12\x0f.pb.UserRequest\x1a\x11.pb.HelloResponse\"\x00\x32\x43\n\x07Timeout\x12\x38\n\x0eTimeoutService\x12\x0f.pb.UserRequest\x1a\x13.pb.TimeoutResponse\"\x00\x42\x0cZ\nbackend/pbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nchat.proto\x12\x02pb\"J\n\x0cHelloRequest\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x02\x12\x0c\n\x04\x62ill\x18\x04 \x01(\x02\"X\n\x0b\x43hatRequest\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x04 \x01(\x02\x12\x0c\n\x04\x62ill\x18\x05 \x01(\x02\"/\n\x0cTimerRequest\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x10\n\x08now_time\x18\x02 \x01(\x05\"L\n\x0c\x43hatResponse\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x02\x12\x0c\n\x04\x62ill\x18\x04 \x01(\x02\x12\x0e\n\x06\x61nswer\x18\x02 \x03(\t\"\x1e\n\rHelloResponse\x12\r\n\x05words\x18\x01 \x03(\t\"m\n\rTimerResponse\x12\r\n\x05state\x18\x01 \x01(\x05\x12\x0f\n\x07is_exit\x18\x02 \x01(\x08\x12\r\n\x05reset\x18\x03 \x01(\x08\x12\x0f\n\x07\x62\x61lance\x18\x05 \x01(\x02\x12\x0c\n\x04\x62ill\x18\x06 \x01(\x02\x12\x0e\n\x06\x61nswer\x18\x04 \x03(\t2A\n\x05Greet\x12\x38\n\x0fSayHelloService\x12\x10.pb.HelloRequest\x1a\x11.pb.HelloResponse\"\x00\x32<\n\x04\x43hat\x12\x34\n\rAnswerService\x12\x0f.pb.ChatRequest\x1a\x10.pb.ChatResponse\"\x00\x32>\n\x05Timer\x12\x35\n\x0cTimerService\x12\x10.pb.TimerRequest\x1a\x11.pb.TimerResponse\"\x00\x42\x0cZ\nbackend/pbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,30 +22,22 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\nbackend/pb'
-  _USERREQUEST_WALLETENTRY._options = None
-  _USERREQUEST_WALLETENTRY._serialized_options = b'8\001'
-  _CHATRESPONSE_WALLETENTRY._options = None
-  _CHATRESPONSE_WALLETENTRY._serialized_options = b'8\001'
-  _TIMEOUTRESPONSE_WALLETENTRY._options = None
-  _TIMEOUTRESPONSE_WALLETENTRY._serialized_options = b'8\001'
-  _globals['_USERREQUEST']._serialized_start=19
-  _globals['_USERREQUEST']._serialized_end=168
-  _globals['_USERREQUEST_WALLETENTRY']._serialized_start=123
-  _globals['_USERREQUEST_WALLETENTRY']._serialized_end=168
-  _globals['_CHATRESPONSE']._serialized_start=171
-  _globals['_CHATRESPONSE']._serialized_end=383
-  _globals['_CHATRESPONSE_WALLETENTRY']._serialized_start=123
-  _globals['_CHATRESPONSE_WALLETENTRY']._serialized_end=168
-  _globals['_HELLORESPONSE']._serialized_start=385
-  _globals['_HELLORESPONSE']._serialized_end=415
-  _globals['_TIMEOUTRESPONSE']._serialized_start=418
-  _globals['_TIMEOUTRESPONSE']._serialized_end=594
-  _globals['_TIMEOUTRESPONSE_WALLETENTRY']._serialized_start=123
-  _globals['_TIMEOUTRESPONSE_WALLETENTRY']._serialized_end=168
-  _globals['_CHAT']._serialized_start=596
-  _globals['_CHAT']._serialized_end=656
-  _globals['_GREET']._serialized_start=658
-  _globals['_GREET']._serialized_end=722
-  _globals['_TIMEOUT']._serialized_start=724
-  _globals['_TIMEOUT']._serialized_end=791
+  _globals['_HELLOREQUEST']._serialized_start=18
+  _globals['_HELLOREQUEST']._serialized_end=92
+  _globals['_CHATREQUEST']._serialized_start=94
+  _globals['_CHATREQUEST']._serialized_end=182
+  _globals['_TIMERREQUEST']._serialized_start=184
+  _globals['_TIMERREQUEST']._serialized_end=231
+  _globals['_CHATRESPONSE']._serialized_start=233
+  _globals['_CHATRESPONSE']._serialized_end=309
+  _globals['_HELLORESPONSE']._serialized_start=311
+  _globals['_HELLORESPONSE']._serialized_end=341
+  _globals['_TIMERRESPONSE']._serialized_start=343
+  _globals['_TIMERRESPONSE']._serialized_end=452
+  _globals['_GREET']._serialized_start=454
+  _globals['_GREET']._serialized_end=519
+  _globals['_CHAT']._serialized_start=521
+  _globals['_CHAT']._serialized_end=581
+  _globals['_TIMER']._serialized_start=583
+  _globals['_TIMER']._serialized_end=645
 # @@protoc_insertion_point(module_scope)

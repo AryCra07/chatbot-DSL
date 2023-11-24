@@ -53,7 +53,7 @@ func UserLoginPost(c *gin.Context) {
 		token, _ := utils.GenerateToken(id, password)
 
 		// reset user state
-		err := dao.UpdateUserState(username, 0)
+		err := dao.UpdateUserState(id, 0)
 		if err != nil {
 			log.Error(consts.Controller, "Update user state fail")
 			c.JSON(http.StatusOK, gin.H{

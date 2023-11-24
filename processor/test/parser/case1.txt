@@ -3,11 +3,13 @@ Variable
     $age  Int  20
 
 State Welcome Verified
-    Speak <, nice to meet you!> + $name
+    Speak $name + <, nice to meet you!>
     Speak <Type "ask" to exit.>
     Case <ask>
+        Goto hello
     Case <query>
-    Case Length
+        Update $name Set <Ayu>
+    Case Length > 5
         Speak $name+ <, sorry I can't answer your question--QAQ>
         Exit
     Case Length < 10

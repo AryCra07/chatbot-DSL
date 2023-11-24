@@ -7,11 +7,18 @@ import (
 	"backend/pb"
 	"context"
 	"google.golang.org/grpc"
-	"strings"
 )
 
-func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
-	// connect gRPC server
+// Timer implement timer service
+/*
+ * @param userId: user's id
+ * @return []string: answer
+ * @return bool: whether the user is exit
+ * @return bool: whether the user is reset
+ * @return bool: whether the service is fail
+ */
+func Timer(userId string, nowTime int32) (*pb.TimerResponse, bool) {
+	// 连接 gRPC 服务器
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Error(consts.Service, "gRPC connect fail: %v")
@@ -24,34 +31,30 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 		}
 	}(conn)
 
-	// create gRPC client
-	client := pb.NewChatClient(conn)
+	// 创建 gRPC 客户端
+	client := pb.NewTimerClient(conn)
 
-	// get user info
 	user, ok := dao.GetUserInfo(userId)
+
 	if !ok {
-		log.Error(consts.Service, "Get user info fail when chat")
+		log.Error(consts.Service, "Timer service fail")
 		return nil, false
 	}
 
-	// prepare request
-	request := &pb.ChatRequest{
+	// 准备请求
+	request := &pb.TimerRequest{
 		State:   user.State,
-		Name:    user.Name,
-		Input:   input,
-		Balance: user.Balance,
-		Bill:    user.Bill,
+		NowTime: nowTime,
 	}
 
-	// call service
-	response, err := client.AnswerService(context.Background(), request)
+	// 调用服务
+	response, err := client.TimerService(context.Background(), request)
 	if err != nil {
-		log.Error(consts.Service, "Chat service fail")
+		log.Error(consts.Service, "Timer service fail")
 		return nil, false
 	}
-	log.Info(consts.Service, printAnswer(response))
 
-	// update user state
+	//log.Info(consts.Service, printAnswer(response))
 	if user.State != response.State {
 		err = dao.UpdateUserState(userId, response.State)
 		if err != nil {
@@ -60,7 +63,6 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 		}
 	}
 
-	// update user wallet
 	if user.Balance != response.Balance || user.Bill != response.Bill {
 		err = dao.UpdateUserWallet(userId, response.Balance, response.Bill)
 		if err != nil {
@@ -70,12 +72,4 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 	}
 
 	return response, true
-}
-
-// printAnswer print answer
-func printAnswer(response *pb.ChatResponse) string {
-	if response.Answer == nil {
-		return "nil"
-	}
-	return strings.Join(response.Answer, " <-| ")
 }

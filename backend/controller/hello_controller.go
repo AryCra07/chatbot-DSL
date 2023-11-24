@@ -2,9 +2,7 @@ package controller
 
 import (
 	"backend/consts"
-	"backend/dao"
 	"backend/log"
-	"backend/model"
 	"backend/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,31 +13,29 @@ import (
  * @param c: gin context
  */
 func UserChatHello(c *gin.Context) {
-	var request model.HelloRequest
-	if err := c.BindJSON(&request); err != nil {
-		log.Error(consts.Controller, "Hello Request Body invalid")
+	// get user id
+	userIdValue := c.Value("UserId")
+	if userIdValue == nil {
+		log.Error(consts.Controller, "user id does not exist when hello")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  consts.InvalidRequest,
+			"msg":  "user id does not exist when hello",
+			"data": nil,
+		})
+		return
+	}
+	userId, ok := userIdValue.(string)
+	if !ok {
+		log.Error(consts.Controller, "user id parse fail when hello")
+		c.JSON(http.StatusOK, gin.H{
+			"code": consts.FAIL,
+			"msg":  "user id parse fail when hello",
 			"data": nil,
 		})
 		return
 	}
 
-	// get parameters
-	name := request.Data.Name
-	userInfo, flag := dao.GetUserInfo(name)
-	if !flag {
-		c.JSON(http.StatusOK, gin.H{
-			"code": consts.FAIL,
-			"msg":  "Get hello message fail -- user not exist",
-			"data": gin.H{
-				"content": nil,
-			},
-		})
-		return
-	}
-	helloWords := service.GetHello(name, 0, map[string]int32{"balance": userInfo.Balance, "bill": userInfo.Bill})
+	helloWords := service.Hello(userId)
 	if helloWords == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,

@@ -5,12 +5,72 @@ import grpc
 import chat_pb2 as chat__pb2
 
 
+class GreetStub(object):
+    """Greet Service
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SayHelloService = channel.unary_unary(
+                '/pb.Greet/SayHelloService',
+                request_serializer=chat__pb2.HelloRequest.SerializeToString,
+                response_deserializer=chat__pb2.HelloResponse.FromString,
+                )
+
+
+class GreetServicer(object):
+    """Greet Service
+    """
+
+    def SayHelloService(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_GreetServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SayHelloService': grpc.unary_unary_rpc_method_handler(
+                    servicer.SayHelloService,
+                    request_deserializer=chat__pb2.HelloRequest.FromString,
+                    response_serializer=chat__pb2.HelloResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'pb.Greet', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class Greet(object):
+    """Greet Service
+    """
+
+    @staticmethod
+    def SayHelloService(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/pb.Greet/SayHelloService',
+            chat__pb2.HelloRequest.SerializeToString,
+            chat__pb2.HelloResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
 class ChatStub(object):
-    """*
-    The gRPC service definition
-    Implement streaming RPCs between backend and processor
-    :param: a request message containing the user's input and basic info
-    :return: a response containing the answer and the latest user's info
+    """Chat Service
     """
 
     def __init__(self, channel):
@@ -21,17 +81,13 @@ class ChatStub(object):
         """
         self.AnswerService = channel.unary_unary(
                 '/pb.Chat/AnswerService',
-                request_serializer=chat__pb2.UserRequest.SerializeToString,
+                request_serializer=chat__pb2.ChatRequest.SerializeToString,
                 response_deserializer=chat__pb2.ChatResponse.FromString,
                 )
 
 
 class ChatServicer(object):
-    """*
-    The gRPC service definition
-    Implement streaming RPCs between backend and processor
-    :param: a request message containing the user's input and basic info
-    :return: a response containing the answer and the latest user's info
+    """Chat Service
     """
 
     def AnswerService(self, request, context):
@@ -45,7 +101,7 @@ def add_ChatServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'AnswerService': grpc.unary_unary_rpc_method_handler(
                     servicer.AnswerService,
-                    request_deserializer=chat__pb2.UserRequest.FromString,
+                    request_deserializer=chat__pb2.ChatRequest.FromString,
                     response_serializer=chat__pb2.ChatResponse.SerializeToString,
             ),
     }
@@ -56,11 +112,7 @@ def add_ChatServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class Chat(object):
-    """*
-    The gRPC service definition
-    Implement streaming RPCs between backend and processor
-    :param: a request message containing the user's input and basic info
-    :return: a response containing the answer and the latest user's info
+    """Chat Service
     """
 
     @staticmethod
@@ -75,14 +127,15 @@ class Chat(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pb.Chat/AnswerService',
-            chat__pb2.UserRequest.SerializeToString,
+            chat__pb2.ChatRequest.SerializeToString,
             chat__pb2.ChatResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
 
-class GreetStub(object):
-    """Missing associated documentation comment in .proto file."""
+class TimerStub(object):
+    """Timer Service
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -90,42 +143,44 @@ class GreetStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SayHelloService = channel.unary_unary(
-                '/pb.Greet/SayHelloService',
-                request_serializer=chat__pb2.UserRequest.SerializeToString,
-                response_deserializer=chat__pb2.HelloResponse.FromString,
+        self.TimerService = channel.unary_unary(
+                '/pb.Timer/TimerService',
+                request_serializer=chat__pb2.TimerRequest.SerializeToString,
+                response_deserializer=chat__pb2.TimerResponse.FromString,
                 )
 
 
-class GreetServicer(object):
-    """Missing associated documentation comment in .proto file."""
+class TimerServicer(object):
+    """Timer Service
+    """
 
-    def SayHelloService(self, request, context):
+    def TimerService(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_GreetServicer_to_server(servicer, server):
+def add_TimerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SayHelloService': grpc.unary_unary_rpc_method_handler(
-                    servicer.SayHelloService,
-                    request_deserializer=chat__pb2.UserRequest.FromString,
-                    response_serializer=chat__pb2.HelloResponse.SerializeToString,
+            'TimerService': grpc.unary_unary_rpc_method_handler(
+                    servicer.TimerService,
+                    request_deserializer=chat__pb2.TimerRequest.FromString,
+                    response_serializer=chat__pb2.TimerResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'pb.Greet', rpc_method_handlers)
+            'pb.Timer', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Greet(object):
-    """Missing associated documentation comment in .proto file."""
+class Timer(object):
+    """Timer Service
+    """
 
     @staticmethod
-    def SayHelloService(request,
+    def TimerService(request,
             target,
             options=(),
             channel_credentials=None,
@@ -135,69 +190,8 @@ class Greet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pb.Greet/SayHelloService',
-            chat__pb2.UserRequest.SerializeToString,
-            chat__pb2.HelloResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-
-class TimeoutStub(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
-        self.TimeoutService = channel.unary_unary(
-                '/pb.Timeout/TimeoutService',
-                request_serializer=chat__pb2.UserRequest.SerializeToString,
-                response_deserializer=chat__pb2.TimeoutResponse.FromString,
-                )
-
-
-class TimeoutServicer(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def TimeoutService(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_TimeoutServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'TimeoutService': grpc.unary_unary_rpc_method_handler(
-                    servicer.TimeoutService,
-                    request_deserializer=chat__pb2.UserRequest.FromString,
-                    response_serializer=chat__pb2.TimeoutResponse.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'pb.Timeout', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
- # This class is part of an EXPERIMENTAL API.
-class Timeout(object):
-    """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def TimeoutService(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pb.Timeout/TimeoutService',
-            chat__pb2.UserRequest.SerializeToString,
-            chat__pb2.TimeoutResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/pb.Timer/TimerService',
+            chat__pb2.TimerRequest.SerializeToString,
+            chat__pb2.TimerResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

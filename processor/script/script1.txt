@@ -1,12 +1,13 @@
 Variable
     $name Text <Ayu>
+    $billing Float 1.1
     $balance Float 10.0
 
 State Welcome
     Speak <你好，> + $name + <！这里是商城客服小A>
     Speak <输入 “查询” 查询余额>
     Speak <输入 “优惠” 获取最新优惠信息>
-    Case Contain <查询>
+    Case Contains <查询>
         Goto Answer
     Default
         Goto Hello

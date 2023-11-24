@@ -77,9 +77,9 @@ func IsUsernameExist(name string) bool {
  * @return user: user
  * @return bool: whether the user exists
  */
-func GetUserInfo(name string) (model.User, bool) {
+func GetUserInfo(id string) (model.User, bool) {
 	var user model.User
-	result := global.DB.Where("name = ?", name).First(&user)
+	result := global.DB.Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		log.Error(consts.Dao, "Query error when executing GetUserInfo")
 		return user, false
@@ -93,9 +93,9 @@ func GetUserInfo(name string) (model.User, bool) {
  * @param state: user's state
  * @return err: error
  */
-func UpdateUserState(name string, state int32) error {
+func UpdateUserState(id string, state int32) error {
 	var user model.User
-	result := global.DB.Where("name = ?", name).First(&user)
+	result := global.DB.Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		log.Error(consts.Dao, "Query error when executing UpdateUserState")
 		return result.Error
@@ -114,9 +114,9 @@ func UpdateUserState(name string, state int32) error {
  * @param wallet: user's wallet
  * @return err: error
  */
-func UpdateUserWallet(name string, balance float32, bill float32) error {
+func UpdateUserWallet(id string, balance float32, bill float32) error {
 	var user model.User
-	result := global.DB.Where("name = ?", name).First(&user)
+	result := global.DB.Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		log.Error(consts.Dao, "Query error when executing UpdateUserWallet")
 		return result.Error

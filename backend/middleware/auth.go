@@ -42,7 +42,6 @@ func AUTHMiddleware() gin.HandlerFunc {
 			log.Info("Middleware", "Authentication successful, ID = "+fmt.Sprintf("%d", userId))
 			context.Set("UserId", userId)
 			context.Next()
-
 		}
 	}
 }

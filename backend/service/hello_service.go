@@ -2,14 +2,15 @@ package service
 
 import (
 	"backend/consts"
+	"backend/dao"
 	"backend/log"
 	"backend/pb"
 	"context"
 	"google.golang.org/grpc"
 )
 
-func GetHello(name string, state int32, wallet map[string]int32) []string {
-	// 连接 gRPC 服务器
+func Hello(userId string) []string {
+	// connect gRPC server
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Error(consts.Service, "gRPC connect fail: %v")
@@ -22,17 +23,25 @@ func GetHello(name string, state int32, wallet map[string]int32) []string {
 		}
 	}(conn)
 
-	// 创建 gRPC 客户端
+	// create gRPC client
 	client := pb.NewGreetClient(conn)
 
-	// 准备请求
-	request := &pb.UserRequest{
-		State:  state,
-		Name:   name,
-		Wallet: wallet,
+	user, ok := dao.GetUserInfo(userId)
+
+	if !ok {
+		log.Error(consts.Service, "Hello service fail")
+		return nil
 	}
 
-	// 调用服务
+	// prepare request
+	request := &pb.HelloRequest{
+		State:   user.State,
+		Name:    user.Name,
+		Balance: user.Balance,
+		Bill:    user.Bill,
+	}
+
+	// call service
 	response, err := client.SayHelloService(context.Background(), request)
 	if err != nil {
 		log.Error(consts.Service, "Hello service fail")

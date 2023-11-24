@@ -18,97 +18,11 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// ChatClient is the client API for Chat service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ChatClient interface {
-	AnswerService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*ChatResponse, error)
-}
-
-type chatClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewChatClient(cc grpc.ClientConnInterface) ChatClient {
-	return &chatClient{cc}
-}
-
-func (c *chatClient) AnswerService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*ChatResponse, error) {
-	out := new(ChatResponse)
-	err := c.cc.Invoke(ctx, "/pb.Chat/AnswerService", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ChatServer is the server API for Chat service.
-// All implementations must embed UnimplementedChatServer
-// for forward compatibility
-type ChatServer interface {
-	AnswerService(context.Context, *UserRequest) (*ChatResponse, error)
-	mustEmbedUnimplementedChatServer()
-}
-
-// UnimplementedChatServer must be embedded to have forward compatible implementations.
-type UnimplementedChatServer struct {
-}
-
-func (UnimplementedChatServer) AnswerService(context.Context, *UserRequest) (*ChatResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AnswerService not implemented")
-}
-func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
-
-// UnsafeChatServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ChatServer will
-// result in compilation errors.
-type UnsafeChatServer interface {
-	mustEmbedUnimplementedChatServer()
-}
-
-func RegisterChatServer(s grpc.ServiceRegistrar, srv ChatServer) {
-	s.RegisterService(&Chat_ServiceDesc, srv)
-}
-
-func _Chat_AnswerService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).AnswerService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/pb.Chat/AnswerService",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).AnswerService(ctx, req.(*UserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Chat_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.Chat",
-	HandlerType: (*ChatServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AnswerService",
-			Handler:    _Chat_AnswerService_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/chat.proto",
-}
-
 // GreetClient is the client API for Greet service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreetClient interface {
-	SayHelloService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+	SayHelloService(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 }
 
 type greetClient struct {
@@ -119,7 +33,7 @@ func NewGreetClient(cc grpc.ClientConnInterface) GreetClient {
 	return &greetClient{cc}
 }
 
-func (c *greetClient) SayHelloService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
+func (c *greetClient) SayHelloService(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
 	out := new(HelloResponse)
 	err := c.cc.Invoke(ctx, "/pb.Greet/SayHelloService", in, out, opts...)
 	if err != nil {
@@ -132,7 +46,7 @@ func (c *greetClient) SayHelloService(ctx context.Context, in *UserRequest, opts
 // All implementations must embed UnimplementedGreetServer
 // for forward compatibility
 type GreetServer interface {
-	SayHelloService(context.Context, *UserRequest) (*HelloResponse, error)
+	SayHelloService(context.Context, *HelloRequest) (*HelloResponse, error)
 	mustEmbedUnimplementedGreetServer()
 }
 
@@ -140,7 +54,7 @@ type GreetServer interface {
 type UnimplementedGreetServer struct {
 }
 
-func (UnimplementedGreetServer) SayHelloService(context.Context, *UserRequest) (*HelloResponse, error) {
+func (UnimplementedGreetServer) SayHelloService(context.Context, *HelloRequest) (*HelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHelloService not implemented")
 }
 func (UnimplementedGreetServer) mustEmbedUnimplementedGreetServer() {}
@@ -157,7 +71,7 @@ func RegisterGreetServer(s grpc.ServiceRegistrar, srv GreetServer) {
 }
 
 func _Greet_SayHelloService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
+	in := new(HelloRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -169,7 +83,7 @@ func _Greet_SayHelloService_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/pb.Greet/SayHelloService",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreetServer).SayHelloService(ctx, req.(*UserRequest))
+		return srv.(GreetServer).SayHelloService(ctx, req.(*HelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -190,86 +104,172 @@ var Greet_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "pb/chat.proto",
 }
 
-// TimeoutClient is the client API for Timeout service.
+// ChatClient is the client API for Chat service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TimeoutClient interface {
-	TimeoutService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*TimeoutResponse, error)
+type ChatClient interface {
+	AnswerService(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (*ChatResponse, error)
 }
 
-type timeoutClient struct {
+type chatClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTimeoutClient(cc grpc.ClientConnInterface) TimeoutClient {
-	return &timeoutClient{cc}
+func NewChatClient(cc grpc.ClientConnInterface) ChatClient {
+	return &chatClient{cc}
 }
 
-func (c *timeoutClient) TimeoutService(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*TimeoutResponse, error) {
-	out := new(TimeoutResponse)
-	err := c.cc.Invoke(ctx, "/pb.Timeout/TimeoutService", in, out, opts...)
+func (c *chatClient) AnswerService(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (*ChatResponse, error) {
+	out := new(ChatResponse)
+	err := c.cc.Invoke(ctx, "/pb.Chat/AnswerService", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TimeoutServer is the server API for Timeout service.
-// All implementations must embed UnimplementedTimeoutServer
+// ChatServer is the server API for Chat service.
+// All implementations must embed UnimplementedChatServer
 // for forward compatibility
-type TimeoutServer interface {
-	TimeoutService(context.Context, *UserRequest) (*TimeoutResponse, error)
-	mustEmbedUnimplementedTimeoutServer()
+type ChatServer interface {
+	AnswerService(context.Context, *ChatRequest) (*ChatResponse, error)
+	mustEmbedUnimplementedChatServer()
 }
 
-// UnimplementedTimeoutServer must be embedded to have forward compatible implementations.
-type UnimplementedTimeoutServer struct {
+// UnimplementedChatServer must be embedded to have forward compatible implementations.
+type UnimplementedChatServer struct {
 }
 
-func (UnimplementedTimeoutServer) TimeoutService(context.Context, *UserRequest) (*TimeoutResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TimeoutService not implemented")
+func (UnimplementedChatServer) AnswerService(context.Context, *ChatRequest) (*ChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AnswerService not implemented")
 }
-func (UnimplementedTimeoutServer) mustEmbedUnimplementedTimeoutServer() {}
+func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
-// UnsafeTimeoutServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TimeoutServer will
+// UnsafeChatServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ChatServer will
 // result in compilation errors.
-type UnsafeTimeoutServer interface {
-	mustEmbedUnimplementedTimeoutServer()
+type UnsafeChatServer interface {
+	mustEmbedUnimplementedChatServer()
 }
 
-func RegisterTimeoutServer(s grpc.ServiceRegistrar, srv TimeoutServer) {
-	s.RegisterService(&Timeout_ServiceDesc, srv)
+func RegisterChatServer(s grpc.ServiceRegistrar, srv ChatServer) {
+	s.RegisterService(&Chat_ServiceDesc, srv)
 }
 
-func _Timeout_TimeoutService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
+func _Chat_AnswerService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TimeoutServer).TimeoutService(ctx, in)
+		return srv.(ChatServer).AnswerService(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.Timeout/TimeoutService",
+		FullMethod: "/pb.Chat/AnswerService",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TimeoutServer).TimeoutService(ctx, req.(*UserRequest))
+		return srv.(ChatServer).AnswerService(ctx, req.(*ChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Timeout_ServiceDesc is the grpc.ServiceDesc for Timeout service.
+// Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Timeout_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.Timeout",
-	HandlerType: (*TimeoutServer)(nil),
+var Chat_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.Chat",
+	HandlerType: (*ChatServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "TimeoutService",
-			Handler:    _Timeout_TimeoutService_Handler,
+			MethodName: "AnswerService",
+			Handler:    _Chat_AnswerService_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pb/chat.proto",
+}
+
+// TimerClient is the client API for Timer service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type TimerClient interface {
+	TimerService(ctx context.Context, in *TimerRequest, opts ...grpc.CallOption) (*TimerResponse, error)
+}
+
+type timerClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTimerClient(cc grpc.ClientConnInterface) TimerClient {
+	return &timerClient{cc}
+}
+
+func (c *timerClient) TimerService(ctx context.Context, in *TimerRequest, opts ...grpc.CallOption) (*TimerResponse, error) {
+	out := new(TimerResponse)
+	err := c.cc.Invoke(ctx, "/pb.Timer/TimerService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TimerServer is the server API for Timer service.
+// All implementations must embed UnimplementedTimerServer
+// for forward compatibility
+type TimerServer interface {
+	TimerService(context.Context, *TimerRequest) (*TimerResponse, error)
+	mustEmbedUnimplementedTimerServer()
+}
+
+// UnimplementedTimerServer must be embedded to have forward compatible implementations.
+type UnimplementedTimerServer struct {
+}
+
+func (UnimplementedTimerServer) TimerService(context.Context, *TimerRequest) (*TimerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TimerService not implemented")
+}
+func (UnimplementedTimerServer) mustEmbedUnimplementedTimerServer() {}
+
+// UnsafeTimerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TimerServer will
+// result in compilation errors.
+type UnsafeTimerServer interface {
+	mustEmbedUnimplementedTimerServer()
+}
+
+func RegisterTimerServer(s grpc.ServiceRegistrar, srv TimerServer) {
+	s.RegisterService(&Timer_ServiceDesc, srv)
+}
+
+func _Timer_TimerService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TimerServer).TimerService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Timer/TimerService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TimerServer).TimerService(ctx, req.(*TimerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Timer_ServiceDesc is the grpc.ServiceDesc for Timer service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Timer_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.Timer",
+	HandlerType: (*TimerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "TimerService",
+			Handler:    _Timer_TimerService_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -35,7 +35,9 @@ class UserInfo(object):
     :ivar send_time: 发送消息的时间
     :ivar answer: 机器人回复
     """
-    def __init__(self, user_state: int, user_name: str, user_input: str, user_wallet: dict[str, Any]) -> None:
+    def __init__(self, user_state: int=0, user_name: str="", user_input: str="", user_wallet=None) -> None:
+        if user_wallet is None:
+            user_wallet = {}
         self.state = user_state
         self.name = user_name
         self.input = user_input
@@ -393,17 +395,17 @@ class StateMachine(object):
     """
     def timeout_transform(self, user_info: UserInfo, now_seconds: int) -> (list[str], bool, bool):
         response: list[str] = []
-        with user_info.lock:
-            last_seconds = user_info.last_time
-            user_info.last_time = now_seconds
+        # with user_info.lock:
+        #     last_seconds = user_info.last_time
+        #     user_info.last_time = now_seconds
         old_state = user_info.state
         for timeout_sec in self.timer[user_info.state].keys():
-            if last_seconds < timeout_sec <= now_seconds:  # 检查字典的键是否在时间间隔内
+            if timeout_sec <= now_seconds:  # 检查字典的键是否在时间间隔内
                 for action in self.timer[user_info.state][timeout_sec]:
                     action.exec(user_info, self.variable_set)
                 if old_state != user_info.state:  # 如果旧状态和新状态不同，执行新状态的speak动作
                     if user_info.state != -1:
-                        response = self.hello(user_info).answer
+                        response = self.hello(user_info)
                     break
         return response, user_info.state == -1, old_state != user_info.state
 
@@ -430,15 +432,18 @@ class StateMachine(object):
 
 if __name__ == '__main__':
     try:
-        m = StateMachine(["./test/parser/case3.txt"])
+        m = StateMachine(["./script/script2.txt"])
         print(m.states)
         print(m.speak)
         print(m.case)
         print(m.default)
         print(m.timer)
         print(m.variable_set)
+        print()
 
-        # u1 = UserInfo(0, 'syh', '12', {'balance': 1000})
+        u1 = UserInfo(1, 'syh', '12', {'balance': 1000})
+        r, n, o = m.timeout_transform(u1, 20)
+        print(r, n, o)
         # # m.hello(u, r)
         # # print(f'answer is {r.answer}')
         # m.hello(u1)
