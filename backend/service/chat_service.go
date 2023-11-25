@@ -36,11 +36,13 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 
 	// prepare request
 	request := &pb.ChatRequest{
-		State:   user.State,
-		Name:    user.Name,
-		Input:   input,
-		Balance: user.Balance,
-		Bill:    user.Bill,
+		State: user.State,
+		Name:  user.Name,
+		Input: input,
+		Wallet: map[string]float32{
+			"balance": user.Balance,
+			"bill":    user.Bill,
+		},
 	}
 
 	// call service
@@ -61,8 +63,9 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 	}
 
 	// update user wallet
-	if user.Balance != response.Balance || user.Bill != response.Bill {
-		err = dao.UpdateUserWallet(userId, response.Balance, response.Bill)
+	if user.Balance != response.Wallet["balance"] || user.Bill != response.Wallet["bill"] {
+		log.Info(consts.Service, "Update user's wallet when chat")
+		err = dao.UpdateUserWallet(userId, response.Wallet["balance"], response.Wallet["bill"])
 		if err != nil {
 			log.Error(consts.Service, "Update user wallet fail when chat")
 			return nil, false

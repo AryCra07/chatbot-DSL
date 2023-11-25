@@ -2,7 +2,7 @@ import pyparsing as pp
 
 
 class ChatDSL(object):
-    """Chat DSL parser
+    """Chat DSL test_scripts
 
     This class is used to parse the chat DSL script into a list of parse results.
     """
@@ -83,6 +83,6 @@ class ChatDSL(object):
 
 if __name__ == '__main__':
     try:
-        print(ChatDSL.parse_scripts(['./test/parser/case3.txt']))
+        print(ChatDSL.parse_scripts(['./test/test_scripts/case3.txt']))
     except pp.ParseException as err:
         print(err.explain())

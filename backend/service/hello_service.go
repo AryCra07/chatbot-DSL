@@ -35,10 +35,8 @@ func Hello(userId string) []string {
 
 	// prepare request
 	request := &pb.HelloRequest{
-		State:   user.State,
-		Name:    user.Name,
-		Balance: user.Balance,
-		Bill:    user.Bill,
+		State: user.State,
+		Name:  user.Name,
 	}
 
 	// call service

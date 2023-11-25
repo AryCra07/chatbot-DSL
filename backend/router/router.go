@@ -21,6 +21,7 @@ func CreateServer() {
 	// index page
 	user.POST("/hello", controller.UserChatHello)
 	user.POST("/message", controller.UserChatMessage)
+	user.POST("/timer", controller.UserTimer)
 
 	// port
 	err := http.ListenAndServe(":8848", router)

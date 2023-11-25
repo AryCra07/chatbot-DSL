@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import i18n from '@/lang';
 import { settingStore } from '@/store';
+import router from '@/router';
 
 const request: AxiosInstance = axios.create({
   baseURL: process.env.VITE_APP_API,
@@ -54,12 +55,13 @@ request.interceptors.response.use(
     const res = response.data;
     console.log(res);
 
+
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 0) {
       ElMessage({
         message: res.msg || 'Error',
         type: 'error',
-        duration: 5 * 1000,
+        duration: 1000,
       });
 
       // -2: wrong token
@@ -72,7 +74,9 @@ request.interceptors.response.use(
           type: 'warning',
         }).then(() => {
           store.setToken('');
-          location.reload();
+          //push to login page
+          router.push({path: '/login'}).then();
+          // location.;
         });
       }
       return Promise.reject(new Error(res.msg || 'Error'));
@@ -84,12 +88,6 @@ request.interceptors.response.use(
     }
   },
   (error) => {
-    console.log('err' + error); // for debug
-    ElMessage({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000,
-    });
     return Promise.reject(error);
   },
 );

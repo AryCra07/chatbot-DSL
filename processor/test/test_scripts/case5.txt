@@ -1,0 +1,17 @@
+Variable
+    $name Text <客户朋友>
+    $balance Float 0.0
+    $bill Float 0.0
+
+State Welcome
+    Speak <你好，> + $name + <！我是商城客服小A>
+    Default
+        Goto Hello
+
+State Hello Verified
+    Case Contains <加钱>
+        Update $balance Add 100
+    Case Contains <减钱>
+        Update $balance Sub 100
+    Default
+        Speak <default>

@@ -31,7 +31,7 @@ func AUTHMiddleware() gin.HandlerFunc {
 		tokenParse, claims, err := utils.ParseToken(token)
 		if err != nil || !tokenParse.Valid {
 			log.Error("Middleware", "Authentication failed with invalid token.")
-			context.JSON(http.StatusUnauthorized, gin.H{
+			context.JSON(http.StatusOK, gin.H{
 				"code": consts.InvalidToken,
 				"msg":  "Authentication failed with invalid token!",
 				"data": nil,

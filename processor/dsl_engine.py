@@ -29,24 +29,20 @@ class UserInfo(object):
     :ivar name: 用户名
     :ivar input: 用户输入
     :ivar wallet: 用户钱包
-    :ivar last_time: 上次发送消息的时间
     :ivar lock: 互斥锁
     :ivar verified: 是否已经通过验证
     :ivar send_time: 发送消息的时间
     :ivar answer: 机器人回复
     """
-    def __init__(self, user_state: int=0, user_name: str="", user_input: str="", user_wallet=None) -> None:
+    def __init__(self, user_state: int, user_name, user_input, user_wallet: dict[str, Any]=None) -> None:
         if user_wallet is None:
             user_wallet = {}
         self.state = user_state
         self.name = user_name
         self.input = user_input
         self.wallet = user_wallet
-        self.last_time = 0
+        self.answer: list[str] = []
         self.lock = Lock()
-        self.verified = False
-        self.send_time = time.time()
-        self.answer = []
 
 
 class Condition(metaclass=ABCMeta):
@@ -187,6 +183,7 @@ class UpdateAction(Action):
     def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         request = user_info.input
         if self.op == 'Add':
+            print('cao')
             value = variable_set[self.variable]
             if self.value == 'Input':  # 根据用户输入处理值
                 print('input' + request)
@@ -371,43 +368,45 @@ class StateMachine(object):
     :param user_info: the user_info before transform
     :return: the user_info after transform
     """
-    def condition_transform(self, user_info: UserInfo) -> UserInfo:
+    def condition_transform(self, user_info: UserInfo) -> bool:
         self.synchronous1(user_info)
         old_s = user_info.state
+        reset = False
         for case in self.case[user_info.state]:
             if case.condition.check(user_info.input):
                 for action in case.actions:
                     action.exec(user_info, self.variable_set)
-                if user_info.state != -1 and user_info.state != old_s:  # 新状态的speak动作
-                    user_info = self.hello(user_info)
-                return user_info
-        for action in self.default[user_info.state]:
+                if user_info.state != -1 and old_s != user_info.state:
+                    reset = True
+                    user_info.answer = self.hello(user_info)
+                self.synchronous2(user_info.wallet)
+                return reset
+        old_s = user_info.state
+        for action in self.default[old_s]:
             action.exec(user_info, self.variable_set)
-        if user_info.state != -1 and user_info.state != old_s:  # 新状态的speak动作
-            user_info = self.hello(user_info)
-        self.synchronous2(user_info)
-        return user_info
+        if user_info.state != -1 and old_s != user_info.state:
+            reset = True
+            user_info.answer = self.hello(user_info)
+        self.synchronous2(user_info.wallet)
+        return reset
 
     """
     this function is used to transform the timeout action
     :param user_info: the user_info to be transformed
-    :param now_seconds: the current time in seconds
+    :param now_time: the current time in seconds
     """
-    def timeout_transform(self, user_info: UserInfo, now_seconds: int) -> (list[str], bool, bool):
-        response: list[str] = []
-        # with user_info.lock:
-        #     last_seconds = user_info.last_time
-        #     user_info.last_time = now_seconds
+    def timeout_transform(self, user_info: UserInfo, last_time: int, now_time: int) -> (UserInfo, bool, bool):
         old_state = user_info.state
         for timeout_sec in self.timer[user_info.state].keys():
-            if timeout_sec <= now_seconds:  # 检查字典的键是否在时间间隔内
+            if last_time < timeout_sec <= now_time:  # 检查字典的键是否在时间间隔内
                 for action in self.timer[user_info.state][timeout_sec]:
+                    print(action)
                     action.exec(user_info, self.variable_set)
                 if old_state != user_info.state:  # 如果旧状态和新状态不同，执行新状态的speak动作
                     if user_info.state != -1:
-                        response = self.hello(user_info)
+                        user_info.answer += self.hello(user_info)
                     break
-        return response, user_info.state == -1, old_state != user_info.state
+        return user_info, user_info.state == -1, old_state != user_info.state
 
     """
     this function is used to synchronize the variable_set with the user_info
@@ -424,15 +423,15 @@ class StateMachine(object):
     this function is used to synchronize the user_info with the variable_set
     :param use_info: the user_info to be synchronized
     """
-    def synchronous2(self, user_info: UserInfo):
+    def synchronous2(self, wallet: dict[str, Any]):
         for key in self.variable_set:
-            if key in user_info.wallet:
-                user_info.wallet[key] = self.variable_set[key]
+            if key in wallet:
+                wallet[key] = self.variable_set[key]
 
 
 if __name__ == '__main__':
     try:
-        m = StateMachine(["./script/script2.txt"])
+        m = StateMachine(["./test/test_scripts/case5.txt"])
         print(m.states)
         print(m.speak)
         print(m.case)
@@ -441,9 +440,13 @@ if __name__ == '__main__':
         print(m.variable_set)
         print()
 
-        u1 = UserInfo(1, 'syh', '12', {'balance': 1000})
-        r, n, o = m.timeout_transform(u1, 20)
-        print(r, n, o)
+        u1 = UserInfo(1, 'syh', '加钱', {'balance': 0, 'bill': 0})
+        m.condition_transform(u1)
+        m.condition_transform(u1)
+        print(m.variable_set)
+        print(u1.wallet)
+        # r, n, o = m.timeout_transform(u1, 20)
+        # print(r, n, o)
         # # m.hello(u, r)
         # # print(f'answer is {r.answer}')
         # m.hello(u1)

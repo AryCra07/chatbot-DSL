@@ -7,7 +7,6 @@ import (
 	"backend/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 func UserTimer(c *gin.Context) {
@@ -23,23 +22,14 @@ func UserTimer(c *gin.Context) {
 	}
 
 	// get parameters
-	timeString := request.Data.NowTime
-	nowTime_, err := strconv.Atoi(timeString)
-	if err != nil {
-		log.Error(consts.Controller, "time parse fail when timer")
-		c.JSON(http.StatusOK, gin.H{
-			"code": consts.FAIL,
-			"msg":  "time parse fail when timer",
-			"data": nil,
-		})
-		return
-	}
-	nowTime := int32(nowTime_)
+	lastTime := request.Data.LastTime
+	nowTime := request.Data.NowTime
+	//nowTime_, err := strconv.Atoi(timeString)
 
 	// get user id
 	userIdValue := c.Value("UserId")
 	if userIdValue == nil {
-		log.Error(consts.Controller, "user id does not exist when hello")
+		log.Error(consts.Controller, "user id does not exist when timer")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
 			"msg":  "user id does not exist when hello",
@@ -49,7 +39,7 @@ func UserTimer(c *gin.Context) {
 	}
 	userId, ok := userIdValue.(string)
 	if !ok {
-		log.Error(consts.Controller, "user id parse fail when hello")
+		log.Error(consts.Controller, "user id parse fail when timer")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
 			"msg":  "user id parse fail when hello",
@@ -59,7 +49,7 @@ func UserTimer(c *gin.Context) {
 	}
 
 	// get response
-	response, ok := service.Timer(userId, nowTime)
+	response, ok := service.Timer(userId, lastTime, nowTime)
 	if response == nil || ok == false {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,

@@ -17,7 +17,7 @@ import (
  * @return bool: whether the user is reset
  * @return bool: whether the service is fail
  */
-func Timer(userId string, nowTime int32) (*pb.TimerResponse, bool) {
+func Timer(userId string, lastTime int32, nowTime int32) (*pb.TimerResponse, bool) {
 	// 连接 gRPC 服务器
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
@@ -37,20 +37,21 @@ func Timer(userId string, nowTime int32) (*pb.TimerResponse, bool) {
 	user, ok := dao.GetUserInfo(userId)
 
 	if !ok {
-		log.Error(consts.Service, "Timer service fail")
+		log.Error(consts.Service, "Timer service fail: user does not exist")
 		return nil, false
 	}
 
 	// 准备请求
 	request := &pb.TimerRequest{
-		State:   user.State,
-		NowTime: nowTime,
+		State:    user.State,
+		NowTime:  nowTime,
+		LastTime: lastTime,
 	}
 
 	// 调用服务
 	response, err := client.TimerService(context.Background(), request)
 	if err != nil {
-		log.Error(consts.Service, "Timer service fail")
+		log.Error(consts.Service, "Timer service fail: %v")
 		return nil, false
 	}
 
@@ -58,15 +59,7 @@ func Timer(userId string, nowTime int32) (*pb.TimerResponse, bool) {
 	if user.State != response.State {
 		err = dao.UpdateUserState(userId, response.State)
 		if err != nil {
-			log.Error(consts.Service, "Update user state fail when chat")
-			return nil, false
-		}
-	}
-
-	if user.Balance != response.Balance || user.Bill != response.Bill {
-		err = dao.UpdateUserWallet(userId, response.Balance, response.Bill)
-		if err != nil {
-			log.Error(consts.Service, "Update user wallet fail when chat")
+			log.Error(consts.Service, "Update user state fail when timer")
 			return nil, false
 		}
 	}

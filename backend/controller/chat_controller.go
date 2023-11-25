@@ -64,6 +64,7 @@ func UserChatMessage(c *gin.Context) {
 			"msg":  "Login success",
 			"data": gin.H{
 				"content": response.Answer,
+				"reset":   response.Reset_,
 			},
 		})
 	}

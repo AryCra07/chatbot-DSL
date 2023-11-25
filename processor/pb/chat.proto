@@ -19,45 +19,38 @@ service Timer {
   rpc TimerService (TimerRequest) returns (TimerResponse) {}
 }
 
-// Greet Request
 message HelloRequest {
   int32 state = 1;
   string name = 2;
-  float balance = 3;
-  float bill = 4;
-}
-
-// Chat Request
-message ChatRequest {
-  int32 state = 1;
-  string name = 2;
-  string input = 3;
-  float balance = 4;
-  float bill = 5;
-}
-
-// Timer Request
-message TimerRequest {
-  int32 state = 1;
-  int32 now_time = 2;
-}
-
-message ChatResponse {
-  int32 state = 1;
-  float balance = 3;
-  float bill = 4;
-  repeated string answer = 2;
 }
 
 message HelloResponse {
   repeated string words = 1;
 }
 
+message ChatRequest {
+  int32 state = 1;
+  string name = 2;
+  string input = 3;
+  map<string, float> wallet = 4;
+}
+
+message ChatResponse {
+  int32 state = 1;
+  repeated string answer = 2;
+  bool reset = 3;
+  map<string, float> wallet = 4;
+}
+
+message TimerRequest {
+  int32 state = 1;
+  int32 last_time = 2;
+  int32 now_time = 3;
+}
+
 message TimerResponse {
   int32 state = 1;
   bool is_exit = 2;
   bool reset = 3;
-  float balance = 5;
-  float bill = 6;
   repeated string answer = 4;
 }

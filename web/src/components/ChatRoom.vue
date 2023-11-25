@@ -5,7 +5,7 @@
         class="avatar"
         shape="square"
         :size="50"
-        :src="require('../assets/img/avatar.jpg')"
+        :src="require('../assets/img/logo.png')"
       />
       <div class="bot-name">
         <span class="title"> AryCra07 </span>
@@ -42,7 +42,7 @@
               style="min-width: 40px"
               shape="circle"
               :size="40"
-              :src="require('../assets/img/avatar.jpg')"
+              :src="require('../assets/img/logo.png')"
             />
             <el-avatar
               v-if="!message.isBot"
@@ -112,8 +112,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { fetchHello, fetchMessage } from '@/api/chat';
-import { ElMessageBox } from 'element-plus';
+import { fetchHello, fetchMessage, fetchTimer } from '@/api/chat';
 import { settingStore } from '@/store';
 
 export default defineComponent({
@@ -124,7 +123,10 @@ export default defineComponent({
       message: '',
       latestMessageID: 0,
       messageHistory: [] as any,
+      timerId: 0 as any,
       store: settingStore(),
+      reset: false,
+      exit: false,
     };
   },
   props: {
@@ -138,18 +140,12 @@ export default defineComponent({
     let fail = false;
     let resp;
     try {
-      resp = await fetchHello({ data: { name: this.store.name } });
+      resp = await fetchHello();
       if (resp.code != 0) {
         fail = true;
       }
     } catch (error) {
-      console.error(error);
       fail = true;
-    }
-
-    if (resp === undefined) {
-      await ElMessageBox.alert(this.$t('error'));
-      return;
     }
 
     if (fail) {
@@ -159,12 +155,67 @@ export default defineComponent({
     }
 
     let msgList = resp.data.content;
-
-    msgList.forEach((msg) => {
-      this.loadMessage(true, msg, Date.now());
-    });
+    if (msgList !== null) {
+      msgList.forEach((msg) => {
+        this.loadMessage(true, msg, Date.now());
+      });
+    }
+    this.startTimer(5000);
   },
   methods: {
+    startTimer(ms: number = 2000) {
+      let now_sec = 0;
+
+      const timerHandler = async () => {
+        if (this.exit) {
+          return
+        }
+        if (this.reset) {
+          now_sec = 0;
+          this.reset = false
+        }
+        now_sec = now_sec + ms / 1000;
+        console.log(now_sec);
+        const resp = await fetchTimer({
+          data: {
+            last_time: Math.round(now_sec - ms / 1000),
+            now_time: Math.round(now_sec),
+          },
+        });
+
+        let msgList = resp.data.content;
+        if (msgList !== null) {
+          msgList.forEach((msg) => {
+            this.loadMessage(true, msg, Date.now());
+          });
+        }
+
+        if (resp.data.reset === true) {
+          this.reset = true
+        }
+
+        if (resp.data.exit === true) {
+          this.store.setToken('');
+          await fetchTimer({
+            data: {
+              last_time: Math.round(now_sec - ms),
+              now_time: Math.round(now_sec),
+            },
+          });
+          // 设置标志为 false，不再继续执行定时器
+          this.exit = true;
+        }
+
+        // 如果标志为 false，则继续执行定时器
+        if (!this.exit) {
+          setTimeout(timerHandler, ms);
+        }
+      };
+
+      // 第一次启动定时器
+      setTimeout(timerHandler, ms);
+    },
+
     async loadMessage(bot: boolean, msg: string, time: number) {
       this.messageHistory.push({
         msg_id: this.latestMessageID++,
@@ -194,9 +245,10 @@ export default defineComponent({
     },
     // to do
     goBack(): void {
-      const parent = this.$parent;
-      console.log(parent);
-      // parent.stage = 0;
+      this.exit = true;
+      this.store.setToken('');
+      this.store.setUserName('');
+      this.$router.push({ path: '/login' });
     },
     async sendMessage() {
       let msg: string = this.message;
@@ -221,6 +273,7 @@ export default defineComponent({
           time = new Date().getTime();
           await this.loadMessage(true, msg, time);
         } else {
+          this.reset = true;
           let data = resp.data.content;
           data.forEach((elem) => {
             this.loadMessage(true, elem, Date.now());
@@ -310,7 +363,7 @@ export default defineComponent({
       position: relative;
       width: auto;
       padding: 10px;
-      background: #f07c82;
+      background: #1491a8;
       -moz-border-radius: 10px;
       -webkit-border-radius: 10px;
       border-radius: 10px;
@@ -329,7 +382,7 @@ export default defineComponent({
       width: 0;
       height: 0;
       border-top: 13px solid transparent;
-      border-right: 26px solid #f07c82;
+      border-right: 26px solid #1491a8;
       border-bottom: 13px solid transparent;
       margin: -3px 0 0 -25px;
     }
@@ -346,14 +399,14 @@ export default defineComponent({
       width: 0;
       height: 0;
       border-top: 13px solid transparent;
-      border-left: 25px solid #1491a8;
+      border-left: 25px solid #f07c82;
       border-bottom: 13px solid transparent;
       margin: 6px -15px 0 0;
     }
 
     .user-bubble {
       margin-right: 25px;
-      background-color: #1491a8;
+      background-color: #f07c82;
     }
 
     .time {

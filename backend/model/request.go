@@ -15,6 +15,7 @@ type MessageRequest struct {
 
 type TimerRequest struct {
 	Data struct {
-		NowTime string `json:"now_time"`
-	}
+		LastTime int32 `json:"last_time"`
+		NowTime  int32 `json:"now_time"`
+	} `json:"data"`
 }
