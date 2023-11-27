@@ -1,20 +1,22 @@
 # chatbot-DSL
 
-A DSL for chatbot in customer service
+A DSL for chatbot with customer service.
+
+![architecture](./doc/arch.png)
 
 ## web
 
-vue+typescript+pinia
+vite+vue+typescript
 
 ## backend
 
-gin+mysql
+gin+gRPC+gorm+mysql
 
 ## processor
 
-### Chat DSL
+python+gRPC
 
-#### Definition
+## DSL Definition
 
 ```
 <number>              ::= "0" | "1" | ... | "9"

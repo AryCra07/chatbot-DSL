@@ -32,7 +32,7 @@ func UserTimer(c *gin.Context) {
 		log.Error(consts.Controller, "user id does not exist when timer")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "user id does not exist when hello",
+			"msg":  "user id does not exist when timer",
 			"data": nil,
 		})
 		return
@@ -42,7 +42,7 @@ func UserTimer(c *gin.Context) {
 		log.Error(consts.Controller, "user id parse fail when timer")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "user id parse fail when hello",
+			"msg":  "user id parse fail when timer",
 			"data": nil,
 		})
 		return
@@ -53,7 +53,7 @@ func UserTimer(c *gin.Context) {
 	if response == nil || ok == false {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "Get Answer fail",
+			"msg":  "Get Timer fail",
 			"data": gin.H{
 				"content": nil,
 			},
@@ -61,7 +61,7 @@ func UserTimer(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.SUCCESS,
-			"msg":  "Login success",
+			"msg":  "Get Timer success",
 			"data": gin.H{
 				"content": response.Answer,
 				"exit":    response.IsExit,

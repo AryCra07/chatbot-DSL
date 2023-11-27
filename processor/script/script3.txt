@@ -2,18 +2,23 @@ Variable
     $name Text <客户朋友>
     $balance Float 0.0
     $bill Float 0.0
+    $phone1 Text <12345678901>
+    $phone2 Text <12345678902>
+    $phone3 Text <12345678903>
 
 State Welcome
     Speak <你好，> + $name + <！我是商城客服小A>
-    Speak <输入“查询”查询你的余额与账单；> + <输入“存款”进行存款操作；> + <输入”咨询“咨询咱家产品>
+    Speak <输入“查询”查询你的余额与账单；> + <输入“存款”进行存款操作；> + <输入”咨询“咨询咱家产品；> + <输入“再见”结束服务。>
     Case Contains <查询>
         Goto Query
     Case Contains <存款>
         Goto Deposit
     Case Contains <咨询>
         Goto AskGood
+    Case Contains <再见>
+        Goto Goodbye
     Default
-        Speak <不好意思没听清，可以再说一遍嘛？>
+        Speak <不好意思我没太懂您的意思，可以再说一遍嘛？>
         Goto Hello
 
 State Hello Verified
@@ -24,42 +29,69 @@ State Hello Verified
         Goto Deposit
     Case Contains <咨询>
         Goto AskGood
+    Case Contains <再见>
+        Goto Goodbye
     Default
-        Speak <不好意思没听清，可以再说一遍嘛？>
+        Speak <不好意思我没太懂您的意思，可以再说一遍嘛？>
         Goto Hello
 
 State Query Verified
-    Speak <你好，> + $name + <！你的余额是> + $balance + <，你的账单是> + $bill
-    Speak <查询结束，祝您生活愉快！>
+    Speak <你好，> + $name + <！你的余额是> + $balance + <元，你的账单是> + $bill + <元。>
+    Speak <还有什么疑问吗？输入“退出”就可以退出服务啦>
+    Case Contains <退出>
+        Speak <查询服务先给您结束了，祝您生活愉快！>
+        Goto Hello
     Default
+        Speak <不好意思我没太懂您的意思，可以再说一遍嘛？输入“退出”就可以退出服务啦>
         Goto Hello
     Timer 10
-        Speak <亲，你还在吗>
+        Speak <亲，请问您还在吗？查询服务会在10s后自动终止>
     Timer 20
-        Speak <这边先给您退出了>
+        Speak <您已超时，查询服务先给您结束了，祝您生活愉快>
         Goto Hello
 
 State Deposit Verified
-    Speak <你好，> + $name + <！请问你想存多少钱？请告诉我一个数字>
+    Speak <你好，> + $name + <！请问你想存多少钱？输入款额就好。如果没有想好可以输入“退出”先退出呢。>
     Case Type Float
         Update $balance Add Input
         Speak <好的，已经给您的卡中存入> + Input + <！您的卡里现在有> + $balance + <元。>
+        Speak <输入“退出”就可以结束服务啦>
+    Case Contains <退出>
+        Speak <存款服务先给您结束了，祝您生活愉快！>
+        Goto Hello
     Default
         Speak <不好意思，您说的不太清楚，我们再来一遍好吗？>
+        Speak <输入款额就可以存钱，输入“退出”就可以结束服务啦>
         Goto Deposit
+    Timer 10
+        Speak <亲，请问您还在吗？存款服务会在10s后自动终止>
     Timer 20
-        Speak <存款服务先给您结束了，祝您生活愉快！>
+        Speak <您已超时，存款服务先给您结束了，祝您生活愉快！>
         Goto Hello
 
 State AskGood Verified
-    Speak <白菜>
+    Speak <您好，我们家有A产品、B产品与C产品，请问您想咨询哪种呢？如果没有想好可以输入“退出”先退出呢。>
+    Case Contains <A>
+        Speak <A产品是我们家的主打产品，您可以拨打> + $phone1 + <进行咨询。>
+    Case Contains <B>
+        Speak <B产品是我们家的次打产品，您可以拨打> + $phone2 + <进行咨询。>
+    Case Contains <C>
+        Speak <C产品是我们家的新产品，您可以拨打> + $phone3 + <进行咨询。>
+    Case Contains <退出>
+        Speak <咨询服务先给您结束了，祝您生活愉快！>
+        Goto Hello
     Default
+        Speak <不好意思，您说的不太清楚，我们再来一遍好吗？>
+        Speak <输入款额就可以存钱，输入“退出”就可以结束服务啦>
+        Goto Deposit
+    Timer 10
+        Speak <亲，请问您还在吗？咨询服务会在10s后自动终止>
+    Timer 20
+        Speak <您已超时，咨询服务先给您结束了，祝您生活愉快！>
         Goto Hello
 
 State Goodbye Verified
-    Speak <bye bye>
+    Speak <感谢您使用我们的客服服务，系统将在5s后自动退出。再会！>
     Default
-    Timer 0
-        Goto Welcome
-    Timer 20
-        Goto Hello
+    Timer 5
+        Exit

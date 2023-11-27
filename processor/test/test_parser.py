@@ -3,7 +3,7 @@
 import os
 import unittest
 from pyparsing import ParseException
-from dsl_parser import ChatDSL
+from dsl.dsl_engine import ChatDSL
 
 current_path = os.path.split(os.path.realpath(__file__))[0]
 

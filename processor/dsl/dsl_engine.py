@@ -1,14 +1,15 @@
-"""生成器模块
+"""dsl_engine.py
 
 该模块读取脚本语言语法分析的结果，并构建出一个 Mealy 状态机。状态机的输入为用户消息类或者超时时长，输出为一个字符串序列。
 
 """
 
+#  Copyright (c) 2023 AryCra07.
+
 from threading import Lock
 from abc import ABCMeta, abstractmethod
 from typing import Any, Union, Optional
-from dsl_parser import ChatDSL
-import time
+from dsl.dsl_parser import ChatDSL
 
 
 class GrammarError(Exception):
@@ -17,6 +18,7 @@ class GrammarError(Exception):
     :ivar msg: 错误信息
     :ivar context: 错误上下文
     """
+
     def __init__(self, msg: str, context: list[str]) -> None:
         self.msg = msg
         self.context = context
@@ -30,11 +32,10 @@ class UserInfo(object):
     :ivar input: 用户输入
     :ivar wallet: 用户钱包
     :ivar lock: 互斥锁
-    :ivar verified: 是否已经通过验证
-    :ivar send_time: 发送消息的时间
     :ivar answer: 机器人回复
     """
-    def __init__(self, user_state: int, user_name, user_input, user_wallet: dict[str, Any]=None) -> None:
+
+    def __init__(self, user_state: int, user_name, user_input, user_wallet: dict[str, Any] = None) -> None:
         if user_wallet is None:
             user_wallet = {}
         self.state = user_state
@@ -123,6 +124,22 @@ class Action(metaclass=ABCMeta):
         pass
 
 
+def is_int(value):
+    try:
+        _ = int(value)
+        return True
+    except ValueError:
+        return False
+
+
+def is_float(value):
+    try:
+        _ = float(value)
+        return True
+    except ValueError:
+        return False
+
+
 class SpeakAction(Action):
     def __init__(self, contents: list[str], variable_set: dict[str, Any]) -> None:
         self.contents = contents
@@ -138,6 +155,10 @@ class SpeakAction(Action):
         res = ''
         for content in self.contents:
             if content[0] == '$':
+                if is_float(variable_set[content[1:]]) and not is_int(variable_set[content[1:]]):
+                    variable_set[content[1:]] = round(float(variable_set[content[1:]]), 2)
+                if content == '$balance' or content == '$bill':
+                    variable_set[content[1:]] = round(float(variable_set[content[1:]]), 2)
                 res += str(variable_set[content[1:]])
             elif content == 'Input':
                 res += user_info.input
@@ -183,31 +204,33 @@ class UpdateAction(Action):
     def exec(self, user_info: UserInfo = None, variable_set: dict[str, Any] = None) -> None:
         request = user_info.input
         if self.op == 'Add':
-            print('cao')
             value = variable_set[self.variable]
             if self.value == 'Input':  # 根据用户输入处理值
-                print('input' + request)
                 print(self.variable)
-                if isinstance(self.value, int):
+                if is_int(request):
+                    print('int')
                     variable_set[self.variable] = value + int(request)
-                elif isinstance(self.value, float):
+                elif is_float(request):
+                    print('float')
                     variable_set[self.variable] = value + float(request)
             else:
                 variable_set[self.variable] = value + self.value
         elif self.op == "Sub":
             value = variable_set[self.variable]
             if self.value == 'Input':  # process based on Input
-                if isinstance(self.value, int):
-                    variable_set[self.variable] = value - int(self.value)
-                elif isinstance(self.value, float):
+                if is_int(request):
+                    print('int')
+                    variable_set[self.variable] = value - int(request)
+                elif is_float(request):
+                    print('float')
                     variable_set[self.variable] = value - float(request)
             else:
                 variable_set[self.variable] = value - self.value
         elif self.op == "Set":
             if self.value == 'Input':  # process based on Input
-                if isinstance(self.value, int):
+                if is_int(request):
                     variable_set[self.variable] = int(request)
-                elif isinstance(self.value, float):
+                elif is_float(request):
                     variable_set[self.variable] = float(request)
                 elif isinstance(self.value, str):
                     variable_set[self.variable] = request
@@ -216,6 +239,7 @@ class UpdateAction(Action):
                     variable_set[self.variable] = self.value[1:-1]
                 else:
                     variable_set[self.variable] = self.value
+        variable_set[self.variable] = round(variable_set[self.variable], 2)
 
 
 class GotoAction(Action):
@@ -251,6 +275,15 @@ class CaseClause(object):
 
 
 class StateMachine(object):
+    """ StateMachine
+
+    :ivar states: 状态列表
+    :ivar variable_set: 变量集合
+    :ivar speak: 说话动作列表
+    :ivar case: 条件列表
+    :ivar default: 默认动作列表
+    :ivar timer: 超时动作列表
+    """
 
     def _action_constructor(self, action_list: list, target_list: list[Action], index: int, verified: list[bool],
                             value_check: Optional[str]) -> None:
@@ -357,6 +390,7 @@ class StateMachine(object):
     :param user_info: the basic user_info
     :return: a list of words for greeting
     """
+
     def hello(self, user_info: UserInfo) -> list[str]:
         self.synchronous1(user_info)
         for action in self.speak[user_info.state]:
@@ -368,43 +402,43 @@ class StateMachine(object):
     :param user_info: the user_info before transform
     :return: the user_info after transform
     """
-    def condition_transform(self, user_info: UserInfo) -> bool:
+
+    def condition_transform(self, user_info: UserInfo) -> any:
         self.synchronous1(user_info)
         old_s = user_info.state
-        reset = False
         for case in self.case[user_info.state]:
             if case.condition.check(user_info.input):
                 for action in case.actions:
                     action.exec(user_info, self.variable_set)
                 if user_info.state != -1 and old_s != user_info.state:
-                    reset = True
                     user_info.answer = self.hello(user_info)
                 self.synchronous2(user_info.wallet)
-                return reset
+                return
         old_s = user_info.state
         for action in self.default[old_s]:
             action.exec(user_info, self.variable_set)
         if user_info.state != -1 and old_s != user_info.state:
-            reset = True
             user_info.answer = self.hello(user_info)
         self.synchronous2(user_info.wallet)
-        return reset
+        return
 
     """
     this function is used to transform the timeout action
     :param user_info: the user_info to be transformed
     :param now_time: the current time in seconds
     """
+
     def timeout_transform(self, user_info: UserInfo, last_time: int, now_time: int) -> (UserInfo, bool, bool):
         old_state = user_info.state
-        for timeout_sec in self.timer[user_info.state].keys():
+        for timeout_sec in self.timer[old_state].keys():
             if last_time < timeout_sec <= now_time:  # 检查字典的键是否在时间间隔内
-                for action in self.timer[user_info.state][timeout_sec]:
+                for action in self.timer[old_state][timeout_sec]:
                     print(action)
                     action.exec(user_info, self.variable_set)
+                    print(user_info.answer)
                 if old_state != user_info.state:  # 如果旧状态和新状态不同，执行新状态的speak动作
                     if user_info.state != -1:
-                        user_info.answer += self.hello(user_info)
+                        user_info.answer = self.hello(user_info)
                     break
         return user_info, user_info.state == -1, old_state != user_info.state
 
@@ -423,7 +457,10 @@ class StateMachine(object):
     this function is used to synchronize the user_info with the variable_set
     :param use_info: the user_info to be synchronized
     """
+
     def synchronous2(self, wallet: dict[str, Any]):
+        wallet['balance'] = self.variable_set['balance']
+        wallet['bill'] = self.variable_set['bill']
         for key in self.variable_set:
             if key in wallet:
                 wallet[key] = self.variable_set[key]
@@ -431,7 +468,8 @@ class StateMachine(object):
 
 if __name__ == '__main__':
     try:
-        m = StateMachine(["./test/test_scripts/case5.txt"])
+        # m = StateMachine(["./test/test_scripts/case5.txt"])
+        m = StateMachine(["./script/script4.txt"])
         print(m.states)
         print(m.speak)
         print(m.case)
@@ -439,27 +477,6 @@ if __name__ == '__main__':
         print(m.timer)
         print(m.variable_set)
         print()
-
-        u1 = UserInfo(1, 'syh', '加钱', {'balance': 0, 'bill': 0})
-        m.condition_transform(u1)
-        m.condition_transform(u1)
-        print(m.variable_set)
-        print(u1.wallet)
-        # r, n, o = m.timeout_transform(u1, 20)
-        # print(r, n, o)
-        # # m.hello(u, r)
-        # # print(f'answer is {r.answer}')
-        # m.hello(u1)
-        # print(m.states[u1.state], u1.answer)
-        # u2 = UserInfo(u1.state, 'syh', '12', {'balance': 1000})
-        # m.condition_transform(u2)
-        # print(m.states[u2.state], u2.answer)
-        # u3 = UserInfo(u2.state, 'syh', 'ask hhhh', {'balance': 1000})
-        # m.condition_transform(u3)
-        # print(m.states[u3.state], u3.answer)
-        # u4 = UserInfo(u3.state, 'syh', '优惠', {'balance': 1000})
-        # m.condition_transform(u4)
-        # print(m.states[u4.state], u4.answer)
 
     except GrammarError as err:
         print(" ".join([str(item) for item in err.context]))

@@ -29,20 +29,20 @@ func UserChatMessage(c *gin.Context) {
 	input := request.Data.Input
 	userIdValue := c.Value("UserId")
 	if userIdValue == nil {
-		log.Error(consts.Controller, "user id does not exist when hello")
+		log.Error(consts.Controller, "user id does not exist when chat")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "user id does not exist when hello",
+			"msg":  "user id does not exist when chat",
 			"data": nil,
 		})
 		return
 	}
 	userId, ok := userIdValue.(string)
 	if !ok {
-		log.Error(consts.Controller, "user id parse fail when hello")
+		log.Error(consts.Controller, "user id parse fail when chat")
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.FAIL,
-			"msg":  "user id parse fail when hello",
+			"msg":  "user id parse fail when chat",
 			"data": nil,
 		})
 		return
@@ -61,10 +61,9 @@ func UserChatMessage(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"code": consts.SUCCESS,
-			"msg":  "Login success",
+			"msg":  "Get Answer success",
 			"data": gin.H{
 				"content": response.Answer,
-				"reset":   response.Reset_,
 			},
 		})
 	}

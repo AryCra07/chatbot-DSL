@@ -1,34 +1,35 @@
 package utils
 
 import (
-	"backend/consts"
-	"backend/log"
 	"testing"
 )
 
-const (
-	userId   string = "userIdForTest"
-	password string = "veryStrongPassword"
-)
-
-func TestGenerateToken(t *testing.T) {
+func TestJWT(t *testing.T) {
+	// 测试生成token
+	userId := "testUser"
+	password := "testPassword"
 	token, err := GenerateToken(userId, password)
 	if err != nil {
-		return
+		t.Errorf("Error generating token: %v", err)
 	}
-	log.Info(consts.Test, token)
-}
 
-func TestParseToken(t *testing.T) {
-	token, err := GenerateToken(userId, password)
+	// 测试解析token
+	parsedToken, claims, err := ParseToken(token)
 	if err != nil {
-		return
+		t.Errorf("Error parsing token: %v", err)
 	}
-	token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkNDY0YzMxMi04NTFiLTExZWUtYjVmMi0wMGZmMDZlNzMxYzUiLCJwYXNzd29yZCI6ImZjMzA1ZmE5M2Q4YzExNTVhMmZhOGNlMGQwNGI3NTFhIiwiZXhwIjoxNzAwMjIxMDczLCJpYXQiOjE3MDAyMDY2NzMsImlzcyI6IkFyeUNyYTA3Iiwic3ViIjoidXNlciB0b2tlbiJ9.EuK-SMygq_NxeqY-NQXu0VDmN1MWYWCn53hAaN6IctY"
-	tokenParse, claims, err := ParseToken(token)
-	if tokenParse.Valid {
-		log.Info(consts.Test, claims.UserId)
-	} else {
-		log.Info(consts.Test, "token is invalid:"+claims.UserId)
+
+	// 检查解析后的claims是否正确
+	if claims.UserId != userId {
+		t.Errorf("Expected UserId to be %s, got %s", userId, claims.UserId)
+	}
+
+	if claims.Password != password {
+		t.Errorf("Expected Password to be %s, got %s", password, claims.Password)
+	}
+
+	// 检查token是否有效
+	if !parsedToken.Valid {
+		t.Error("Parsed token is not valid")
 	}
 }

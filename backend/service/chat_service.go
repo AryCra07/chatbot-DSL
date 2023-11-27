@@ -62,15 +62,20 @@ func ChatResponse(userId string, input string) (*pb.ChatResponse, bool) {
 		}
 	}
 
+	//err = dao.UpdateUserWallet(userId, 100, 0)
+	//if err != nil {
+	//	return nil, false
+	//}
+
 	// update user wallet
-	if user.Balance != response.Wallet["balance"] || user.Bill != response.Wallet["bill"] {
-		log.Info(consts.Service, "Update user's wallet when chat")
-		err = dao.UpdateUserWallet(userId, response.Wallet["balance"], response.Wallet["bill"])
-		if err != nil {
-			log.Error(consts.Service, "Update user wallet fail when chat")
-			return nil, false
-		}
+	//if user.Balance != response.Wallet["balance"] || user.Bill != response.Wallet["bill"] { }
+
+	err = dao.UpdateUserWallet(userId, response.Wallet["balance"], response.Wallet["bill"])
+	if err != nil {
+		log.Error(consts.Service, "Update user wallet fail when chat")
+		return nil, false
 	}
+	//}
 
 	return response, true
 }

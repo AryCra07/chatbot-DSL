@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-room">
+  <div class="chat-room" ref="chatroom">
     <div class="header">
       <el-avatar
         class="avatar"
@@ -22,14 +22,21 @@
     </div>
 
     <div style="height: 10px"></div>
-    <div class="main">
+    <div class="main" ref="mainContainer">
       <el-scrollbar
         ref="historyScrollbar"
         class="chat"
+        :native="false"
+        :max-scroll-top="maxScrollTop"
       >
         <div
           ref="historyContent"
-          style=""
+          style="
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding-top: 20px;
+          "
         >
           <div
             v-for="message in messageHistory"
@@ -111,7 +118,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, toRaw } from 'vue';
 import { fetchHello, fetchMessage, fetchTimer } from '@/api/chat';
 import { settingStore } from '@/store';
 
@@ -124,6 +131,7 @@ export default defineComponent({
       latestMessageID: 0,
       messageHistory: [] as any,
       timerId: 0 as any,
+      maxScrollTop: 1000000,
       store: settingStore(),
       reset: false,
       exit: false,
@@ -136,7 +144,6 @@ export default defineComponent({
     error: { type: String, default: '' },
   },
   async mounted() {
-    // console.log(store.name)
     let fail = false;
     let resp;
     try {
@@ -163,17 +170,25 @@ export default defineComponent({
     this.startTimer(5000);
   },
   methods: {
+    scrollToBottom() {
+      let historyScrollbar = this.$refs.chatroom;
+      this.$nextTick(() => {
+        historyScrollbar.scrollTop = 10000;
+      }, 0);
+    },
     startTimer(ms: number = 2000) {
       let now_sec = 0;
 
       const timerHandler = async () => {
         if (this.exit) {
-          return
+          return;
         }
         if (this.reset) {
+          clearTimeout(this.timerId);
           now_sec = 0;
-          this.reset = false
+          this.reset = false;
         }
+
         now_sec = now_sec + ms / 1000;
         console.log(now_sec);
         const resp = await fetchTimer({
@@ -182,18 +197,15 @@ export default defineComponent({
             now_time: Math.round(now_sec),
           },
         });
-
         let msgList = resp.data.content;
         if (msgList !== null) {
           msgList.forEach((msg) => {
             this.loadMessage(true, msg, Date.now());
           });
         }
-
         if (resp.data.reset === true) {
-          this.reset = true
+          this.reset = true;
         }
-
         if (resp.data.exit === true) {
           this.store.setToken('');
           await fetchTimer({
@@ -208,7 +220,7 @@ export default defineComponent({
 
         // 如果标志为 false，则继续执行定时器
         if (!this.exit) {
-          setTimeout(timerHandler, ms);
+          this.timerId = setTimeout(timerHandler, ms);
         }
       };
 
@@ -216,17 +228,17 @@ export default defineComponent({
       setTimeout(timerHandler, ms);
     },
 
-    async loadMessage(bot: boolean, msg: string, time: number) {
+    loadMessage(bot: boolean, msg: string, time: number) {
       this.messageHistory.push({
         msg_id: this.latestMessageID++,
         isBot: bot,
         content: msg,
         time: time,
       });
-      await this.$nextTick();
-      let historyContent = this.$refs.historyContent as any;
-      let historyScrollbar = this.$refs.historyScrollbar as any;
-      historyScrollbar.setScrollTop(historyContent.clientHeight);
+      // await this.$nextTick(() => {
+      //   this.scrollToBottom();
+      // });
+      setTimeout(this.scrollToBottom, 2000);
     },
     fillZero(num: number): string | number {
       return (num < 10 ? '0' : '') + num;
@@ -257,7 +269,7 @@ export default defineComponent({
       }
       let time: number = new Date().getTime();
       this.message = '';
-      await this.loadMessage(false, msg, time);
+      this.loadMessage(false, msg, time);
 
       try {
         let resp = await fetchMessage({
@@ -267,11 +279,11 @@ export default defineComponent({
         if (resp.code == 2) {
           msg = this.$t('expire');
           time = new Date().getTime();
-          await this.loadMessage(true, msg, time);
+          this.loadMessage(true, msg, time);
         } else if (resp.code != 0) {
           msg = this.error;
           time = new Date().getTime();
-          await this.loadMessage(true, msg, time);
+          this.loadMessage(true, msg, time);
         } else {
           this.reset = true;
           let data = resp.data.content;
@@ -283,7 +295,7 @@ export default defineComponent({
         console.error(error);
         msg = this.error;
         time = new Date().getTime();
-        await this.loadMessage(true, msg, time);
+        this.loadMessage(true, msg, time);
       }
     },
   },
@@ -291,6 +303,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.chat-room {
+  max-height: 100vh;
+  overflow-y: auto;
+}
 .header {
   display: flex;
   align-items: center;

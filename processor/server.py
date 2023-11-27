@@ -1,7 +1,7 @@
 import grpc
 import time
 import argparse
-import dsl_engine as gn
+from dsl import dsl_engine as gn
 from concurrent import futures
 from pb import chat_pb2
 from pb import chat_pb2_grpc
@@ -29,12 +29,11 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
     def AnswerService(self, request, context):
         u = gn.UserInfo(request.state, request.name, request.input, request.wallet)
         print('AnswerService -- ' + 'name=' + request.name + ' state=' + str(m.states[u.state]) + ' input=' + u.input)
-        m.condition_transform(u)
 
         # Process the request as needed
+        m.condition_transform(u)
 
         # Send a response message back to the client
-        print(m.variable_set)
         response = chat_pb2.ChatResponse(state=u.state, answer=u.answer, wallet=u.wallet)
         return response
 

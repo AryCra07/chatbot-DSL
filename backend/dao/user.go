@@ -126,5 +126,6 @@ func UpdateUserWallet(id string, balance float32, bill float32) error {
 		log.Error(consts.Dao, "Update error when executing UpdateUserWallet")
 		return result.Error
 	}
+	log.Info(consts.Dao, "Update user's wallet successfully")
 	return nil
 }

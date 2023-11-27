@@ -83,6 +83,6 @@ class ChatDSL(object):
 
 if __name__ == '__main__':
     try:
-        print(ChatDSL.parse_scripts(['./test/test_scripts/case3.txt']))
+        print(ChatDSL.parse_scripts(['processor/script/script3.txt']))
     except pp.ParseException as err:
         print(err.explain())

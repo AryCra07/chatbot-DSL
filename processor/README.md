@@ -44,3 +44,16 @@
 ```bash
 python -m grpc_tools.protoc -I./pb --python_out=./pb --grpc_python_out=./pb ./pb/chat.proto
 ```
+
+## Run
+
+```bash
+python server.py
+```
+
+## Test
+
+```bash
+cd test
+python test/main_test.py
+```
