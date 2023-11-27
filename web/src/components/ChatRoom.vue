@@ -1,5 +1,8 @@
 <template>
-  <div class="chat-room" ref="chatroom">
+  <div
+    class="chat-room"
+    ref="chatroom"
+  >
     <div class="header">
       <el-avatar
         class="avatar"
@@ -22,7 +25,10 @@
     </div>
 
     <div style="height: 10px"></div>
-    <div class="main" ref="mainContainer">
+    <div
+      class="main"
+      ref="mainContainer"
+    >
       <el-scrollbar
         ref="historyScrollbar"
         class="chat"

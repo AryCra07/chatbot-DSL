@@ -25,7 +25,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Login } from '@/api/login-register';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
