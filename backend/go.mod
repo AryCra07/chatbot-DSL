@@ -1,4 +1,4 @@
-module backend
+module github.com/AryCra07/chatbot-DSL/backend
 
 go 1.20
 
